@@ -17,7 +17,7 @@ public class RootController {
     public ResponseEntity<RootResource> root() {
         RootResource root = new RootResource();
         root.add(linkTo(methodOn(RootController.class).root()).withSelfRel());
-        root.add(linkTo(SessionController.class).withRel("psod"));
+        root.add(linkTo(SessionController.class).withRel("session"));
         return new ResponseEntity<RootResource>(root, HttpStatus.OK);
     }
 }
