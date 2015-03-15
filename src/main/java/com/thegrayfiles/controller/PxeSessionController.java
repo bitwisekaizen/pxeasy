@@ -4,9 +4,7 @@ import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -15,10 +13,15 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("session")
 public class PxeSessionController {
 
-    @RequestMapping
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
         PxeSessionResource session = new PxeSessionResource(request.getMacAddress());
-        session.add(linkTo(methodOn(PxeSessionController.class).create(request)).withSelfRel());
+        session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
         return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
+    public ResponseEntity<PxeSessionResource> getByUuid(@PathVariable String uuid) {
+        return null;
     }
 }
