@@ -2,6 +2,8 @@ package com.thegrayfiles.controller;
 
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
+import com.thegrayfiles.service.PxeFileCreator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +15,19 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("session")
 public class PxeSessionController {
 
+    private PxeFileCreator fileCreator;
+
+    @Autowired
+    public PxeSessionController(PxeFileCreator fileCreator) {
+        this.fileCreator = fileCreator;
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
-        PxeSessionResource session = new PxeSessionResource(request.getMacAddress());
+        String macAddress = request.getMacAddress();
+        PxeSessionResource session = new PxeSessionResource(macAddress);
         session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
+        fileCreator.createMacAddressConfiguration(macAddress);
         return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
     }
 

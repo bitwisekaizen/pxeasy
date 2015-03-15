@@ -1,5 +1,6 @@
-package com.thegrayfiles;
+package com.thegrayfiles.acceptance;
 
+import com.thegrayfiles.Application;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import com.thegrayfiles.resource.RootResource;
@@ -27,7 +28,7 @@ import static org.testng.Assert.assertTrue;
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
 @IntegrationTest({"server.port:0"})
-// See http://stackoverflow.com/questions/25537436/integration-testing-a-spring-boot-web-app-with-testng
+// See http://stackoverflow.com/questions/25537436/acceptance-testing-a-spring-boot-web-app-with-testng
 @TestExecutionListeners(inheritListeners = false, listeners = {
         DependencyInjectionTestExecutionListener.class,
         DirtiesContextTestExecutionListener.class })
