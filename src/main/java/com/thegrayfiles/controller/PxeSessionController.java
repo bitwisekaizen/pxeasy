@@ -2,7 +2,7 @@ package com.thegrayfiles.controller;
 
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
-import com.thegrayfiles.service.PxeFileCreator;
+import com.thegrayfiles.service.PxeFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +15,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("session")
 public class PxeSessionController {
 
-    private PxeFileCreator fileCreator;
+    private PxeFileService fileCreator;
 
     @Autowired
-    public PxeSessionController(PxeFileCreator fileCreator) {
+    public PxeSessionController(PxeFileService fileCreator) {
         this.fileCreator = fileCreator;
     }
 

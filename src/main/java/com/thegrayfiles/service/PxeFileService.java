@@ -8,11 +8,11 @@ import java.io.File;
 import java.io.IOException;
 
 @Service
-public class PxeFileCreator {
+public class PxeFileService {
 
     private ClassPathResource template;
 
-    public PxeFileCreator() {
+    public PxeFileService() {
         template = new ClassPathResource("mac.cfg");
     }
 
