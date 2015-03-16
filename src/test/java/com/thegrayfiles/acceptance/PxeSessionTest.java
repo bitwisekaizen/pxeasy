@@ -51,9 +51,25 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         macAddressFile.deleteOnExit();
 
         String macAddressFileContent = FileUtils.readFileToString(macAddressFile);
-        assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile + "should exist.");
+        assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile + " should exist.");
         assertTrue(macAddressFileContent.startsWith("default menu.c32"),
                 "Unexpected MAC address file content: " + macAddressFileContent);
+    }
+
+    @Test
+    public void pxeSessionGeneratesKickstartFile() throws IOException {
+        String kickstartFilename = "/var/www/ks/auto-esxhost/test.ks";
+        String macAddress = "00:11:22:33:44:55";
+        ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
+        assertEquals(session.getStatusCode().value(), 200);
+
+        File kickstartFile = new File(kickstartFilename);
+        kickstartFile.deleteOnExit();
+
+        String kickstartFileContent = FileUtils.readFileToString(kickstartFile);
+        assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
+        assertTrue(kickstartFileContent.startsWith("accepteula"),
+                "Unexpected kickstart file content: " + kickstartFileContent);
     }
 
     private ResponseEntity<PxeSessionResource> createPxeSessionForMacAddress(String macAddress) {
@@ -100,5 +116,32 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
      menu label ^2 - Install VMware ESXi 5.1 - Fully Configured
      kernel esxi-5.1/mboot.c32
      append -c esxi-5.1/boot.cfg ks=http://10.100.20.49/ks/auto-esxhost/esxi-v55-112.cfg
+
+
+
+     accepteula
+     install --firstdisk --overwritevmfs
+     rootpw ***REMOVED***
+     network --bootproto=static --device=vmnic0 --ip=%(ipaddress)s --gateway=%(gatew\
+     ay)s --netmask=%(netmask)s --hostname=%(name)s --nameserver=%(nameserver)s
+     reboot
+
+     %firstboot --interpreter=busybox
+
+     esxcli network ip set --ipv6-enabled=false
+
+     # Enable SSH and the ESXi Shell
+     vim-cmd hostsvc/enable_ssh
+     vim-cmd hostsvc/start_ssh
+     vim-cmd hostsvc/enable_esx_shell
+     vim-cmd hostsvc/start_esx_shell
+
+     esxcli system maintenanceMode set -e true
+     esxcli software vib install -v http://10.100.20.49/vibs/esx-tools-for-esxi-9.7.\
+     0-0.0.00000.i386.vib -f
+
+     esxcli system shutdown reboot -r "rebootingAfterHostConfigurations"
+
+     esxcli system maintenanceMode set -e false
      */
 }
