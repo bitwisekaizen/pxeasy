@@ -14,8 +14,8 @@ public class PxeFileService {
     private ClassPathResource kickstartTemplate;
 
     public PxeFileService() {
-        macTemplate = new ClassPathResource("mac.cfg");
-        kickstartTemplate = new ClassPathResource("kickstart.ks");
+        macTemplate = new ClassPathResource("mac");
+        kickstartTemplate = new ClassPathResource("kickstart.cfg");
     }
 
     public void createMacAddressConfiguration(String macAddress) {
@@ -27,12 +27,12 @@ public class PxeFileService {
     }
 
     private File convertMacAddressToFile(String macAddress) {
-        return new File("/tftpboot/pxe/pxelinux.cfg/01-" + macAddress.replaceAll("[:]", "-") + ".cfg");
+        return new File("/tftpboot/pxe/pxelinux.cfg/01-" + macAddress.replaceAll("[:]", "-"));
     }
 
     public void createKickstartConfiguration() {
         try {
-            FileUtils.copyFile(kickstartTemplate.getFile(), new File("/var/www/ks/auto-esxhost/test.ks"));
+            FileUtils.copyFile(kickstartTemplate.getFile(), new File("/var/www/ks/auto-esxhost/test.cfg"));
         } catch (IOException e) {
             // throw relevant wrapped exception here.
         }
