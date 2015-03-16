@@ -119,29 +119,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
 
 
-     accepteula
-     install --firstdisk --overwritevmfs
-     rootpw ***REMOVED***
-     network --bootproto=static --device=vmnic0 --ip=%(ipaddress)s --gateway=%(gatew\
-     ay)s --netmask=%(netmask)s --hostname=%(name)s --nameserver=%(nameserver)s
-     reboot
 
-     %firstboot --interpreter=busybox
-
-     esxcli network ip set --ipv6-enabled=false
-
-     # Enable SSH and the ESXi Shell
-     vim-cmd hostsvc/enable_ssh
-     vim-cmd hostsvc/start_ssh
-     vim-cmd hostsvc/enable_esx_shell
-     vim-cmd hostsvc/start_esx_shell
-
-     esxcli system maintenanceMode set -e true
-     esxcli software vib install -v http://10.100.20.49/vibs/esx-tools-for-esxi-9.7.\
-     0-0.0.00000.i386.vib -f
-
-     esxcli system shutdown reboot -r "rebootingAfterHostConfigurations"
-
-     esxcli system maintenanceMode set -e false
      */
 }

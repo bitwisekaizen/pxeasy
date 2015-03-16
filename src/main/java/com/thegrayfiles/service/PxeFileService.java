@@ -10,15 +10,17 @@ import java.io.IOException;
 @Service
 public class PxeFileService {
 
-    private ClassPathResource template;
+    private ClassPathResource macTemplate;
+    private ClassPathResource kickstartTemplate;
 
     public PxeFileService() {
-        template = new ClassPathResource("mac.cfg");
+        macTemplate = new ClassPathResource("mac.cfg");
+        kickstartTemplate = new ClassPathResource("kickstart.ks");
     }
 
     public void createMacAddressConfiguration(String macAddress) {
         try {
-            FileUtils.copyFile(template.getFile(), convertMacAddressToFile(macAddress));
+            FileUtils.copyFile(macTemplate.getFile(), convertMacAddressToFile(macAddress));
         } catch (IOException e) {
             // throw relevant wrapped exception here.
         }
@@ -26,5 +28,13 @@ public class PxeFileService {
 
     private File convertMacAddressToFile(String macAddress) {
         return new File("/tftpboot/pxe/pxelinux.cfg/01-" + macAddress.replaceAll("[:]", "-") + ".cfg");
+    }
+
+    public void createKickstartConfiguration() {
+        try {
+            FileUtils.copyFile(kickstartTemplate.getFile(), new File("/var/www/ks/auto-esxhost/test.ks"));
+        } catch (IOException e) {
+            // throw relevant wrapped exception here.
+        }
     }
 }
