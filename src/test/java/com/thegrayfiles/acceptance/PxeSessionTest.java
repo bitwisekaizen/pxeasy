@@ -43,7 +43,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void pxeSessionGeneratesMacConfigFile() throws IOException {
-        String macAddress = "00:11:22:33:44:55";
+        String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
@@ -73,9 +73,9 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
                 "Unexpected kickstart file content: " + kickstartFileContent);
     }
 
-    @Test
-    public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException {
-        String macAddress = "00:11:22:33:44:55";
+    @Test(timeOut = 5*1000)
+    public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
+        String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
         String kickstartFilename = "/var/www/ks/auto-esxhost/test.cfg";
 
@@ -88,11 +88,15 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         macAddressFile.deleteOnExit();
 
         File syslogFile = new File("/var/log/syslog");
-        syslogFile.deleteOnExit();
-        FileUtils.writeStringToFile(syslogFile,
-                "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename);
+        String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
+        String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-5.5.0/tools.t00\n";
+        while (macAddressFile.exists()) {
+            FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
+            Thread.sleep(1000);
+            FileUtils.writeStringToFile(syslogFile, toolsSyslog);
+        }
 
-        assertFalse(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should not exist.");
+        assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
         assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
     }
 
@@ -101,48 +105,4 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         RootResource root = template.getForEntity(url, RootResource.class).getBody();
         return template.postForEntity(root.getLink("session").getHref(), new PxeSessionRequestResource(macAddress), PxeSessionResource.class);
     }
-
-    /**
-     *         RestTemplate template = new RestTemplate();
-     RootResource root = template.getForEntity("http://localhost:8080/", Roo\
-     tResource.class).getBody();
-     PsodResource psod = template.getForEntity(root.getLink("psod").getHref(\
-     ) + "?vm=" + vm, PsodResource.class).getBody();
-     return psod.getText();
-     root@pxe:~# ls /var/www/ks/auto-esxhost/
-     esxi-v55-112.cfg
-     //Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/01-78-2b-cb-28-07-a6
-     root@pxe:~# ls /tftpboot/pxe/pxelinux.cfg/
-     01-00-50-56-9c-36-c5  block  default
-     root@pxe:~# cat /tftpboot/pxe/pxelinux.cfg/01-00-50-56-9c-36-c5
-     default menu.c32
-     prompt 0
-     timeout 10
-
-     menu title PXE Boot Menu
-
-     label local
-     menu label - Install VMware ESXi 5.5 - Fully Configured
-     kernel esxi-5.5/mboot.c32
-     append -c esxi-5.5/boot.cfg ks=http://10.100.20.49/ks/auto-esxhost/esxi-v55-112.cfg
-
-     label local
-     menu label ^1 - Install VMware ESXi 4.1 - Fully Configured
-     kernel esxi-4.1/mboot.c32
-     append esxi-4.1/vmkboot.gz ks=http://10.100.20.49/ks/auto-esxhost/esxi-v55-112.cfg --- esxi-4.1/vmkernel.gz --- esxi-4.1/sys.vgz --- esxi-4.1/cim.vgz --- esxi-4.1/ienviron.vgz --- esxi-4.1/install.vgz
-
-     label local
-     menu label ^1 - Install VMware ESXi 5.0 - Fully Configured
-     kernel esxi-5.0/mboot.c32
-     append -c esxi-5.0/boot.cfg ks=http://10.100.20.49/ks/auto-esxhost/esxi-v55-112.cfg
-
-     label local
-     menu label ^2 - Install VMware ESXi 5.1 - Fully Configured
-     kernel esxi-5.1/mboot.c32
-     append -c esxi-5.1/boot.cfg ks=http://10.100.20.49/ks/auto-esxhost/esxi-v55-112.cfg
-
-
-
-
-     */
 }

@@ -1,6 +1,7 @@
 package com.thegrayfiles.service;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +21,9 @@ public class PxeFileService {
 
     public void createMacAddressConfiguration(String macAddress) {
         try {
-            FileUtils.copyFile(macTemplate.getFile(), convertMacAddressToFile(macAddress));
+            FileUtils.copyURLToFile(macTemplate.getURL(), convertMacAddressToFile(macAddress));
         } catch (IOException e) {
-            // throw relevant wrapped exception here.
+            Logger.getRootLogger().error(e);
         }
     }
 
@@ -32,9 +33,18 @@ public class PxeFileService {
 
     public void createKickstartConfiguration() {
         try {
-            FileUtils.copyFile(kickstartTemplate.getFile(), new File("/var/www/ks/auto-esxhost/test.cfg"));
+            FileUtils.copyURLToFile(kickstartTemplate.getURL(), new File("/var/www/ks/auto-esxhost/test.cfg"));
         } catch (IOException e) {
-            // throw relevant wrapped exception here.
+            Logger.getRootLogger().error(e);
+        }
+    }
+
+    public void deleteMacAddressConfiguration(String macAddressFile) {
+        try {
+            Logger.getRootLogger().info("Attempting to delete files.");
+            FileUtils.forceDelete(new File("/tftpboot/pxe/pxelinux.cfg/" + macAddressFile));
+        } catch (IOException e) {
+            Logger.getRootLogger().error(e);
         }
     }
 }
