@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -50,17 +51,22 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         File macAddressFile = new File("/tftpboot/pxe/pxelinux.cfg/" + macAddressFilename);
         macAddressFile.deleteOnExit();
-
-        String macAddressFileContent = FileUtils.readFileToString(macAddressFile);
         assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
-        assertTrue(macAddressFileContent.startsWith("default menu.c32"),
-                "Unexpected MAC address file content: " + macAddressFileContent);
+
+        List<String> macAddressFileContent = FileUtils.readLines(macAddressFile);
+        assertTrue(macAddressFileContent.get(0).startsWith("default menu.c32"),
+                "Unexpected first line of MAC address file: " + macAddressFileContent.get(0));
+
+        assertTrue(macAddressFileContent.get(macAddressFileContent.size() - 1).matches("^\\s+append.*?" + macAddress.replaceAll("[:]", "-")+ "\\.cfg$"),
+                "Unexpected last line of MAC address file: " + macAddressFileContent.get(macAddressFileContent.size() - 1));
+
     }
 
     @Test
     public void pxeSessionGeneratesKickstartFile() throws IOException {
-        String kickstartFilename = "/var/www/ks/auto-esxhost/test.cfg";
+
         String macAddress = "00:11:22:33:44:55";
+        String kickstartFilename = "/var/www/ks/auto-esxhost/" + macAddress.replaceAll("[:]", "-") + ".cfg";
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 
@@ -68,6 +74,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         kickstartFile.deleteOnExit();
 
         String kickstartFileContent = FileUtils.readFileToString(kickstartFile);
+
         assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
         assertTrue(kickstartFileContent.startsWith("accepteula"),
                 "Unexpected kickstart file content: " + kickstartFileContent);
@@ -77,7 +84,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
         String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-        String kickstartFilename = "/var/www/ks/auto-esxhost/test.cfg";
+        String kickstartFilename = "/var/www/ks/auto-esxhost/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);

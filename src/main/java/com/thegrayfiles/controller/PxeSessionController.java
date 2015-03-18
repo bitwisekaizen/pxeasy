@@ -28,7 +28,7 @@ public class PxeSessionController {
         PxeSessionResource session = new PxeSessionResource(macAddress);
         session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
         fileCreator.createMacAddressConfiguration(macAddress);
-        fileCreator.createKickstartConfiguration();
+        fileCreator.createKickstartConfiguration(macAddress);
         return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
     }
 
