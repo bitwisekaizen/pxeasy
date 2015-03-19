@@ -11,7 +11,7 @@
 
     <int-file:tail-inbound-channel-adapter id="fileInboundChannelAdapter"
                                            channel="fromFileToParser"
-                                           file="/var/log/syslog"
+                                           file="#{applicationConfig.syslogPath}"
                                            native-options="-F -n -1"
                                            file-delay="10000" />
 

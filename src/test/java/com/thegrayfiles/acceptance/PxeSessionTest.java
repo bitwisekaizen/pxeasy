@@ -13,6 +13,7 @@ import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.integration.file.tail.FileTailingMessageProducerSupport;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -45,14 +46,21 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private ApplicationConfig config;
 
+    @Autowired
+    private FileTailingMessageProducerSupport tailer;
+
     private RestTemplate template = new TestRestTemplate();
 
     @BeforeMethod
-    public void setup() {
+    public void setup() throws IOException {
         String pxePath = Files.createTempDir().getAbsolutePath();
         config.setPxePath(pxePath);
         String kickstartPath = Files.createTempDir().getAbsolutePath();
         config.setKickstartPath(kickstartPath);
+        File syslogFile = File.createTempFile("sys", "log");
+        tailer.stop();
+        tailer.setFile(syslogFile);
+        tailer.start();
     }
 
     @Test
@@ -96,17 +104,17 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
         String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-        String kickstartFilename = config.getKickstartPath() + macAddress.replaceAll("[:]", "-") + ".cfg";
+        String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 
         File kickstartFile = new File(kickstartFilename);
         kickstartFile.deleteOnExit();
-        File macAddressFile = new File(config.getPxePath() + macAddressFilename);
+        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
         macAddressFile.deleteOnExit();
 
-        File syslogFile = new File("/var/log/syslog");
+        File syslogFile = new File(config.getSyslogPath());
         String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
         String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-5.5.0/tools.t00\n";
         while (macAddressFile.exists()) {

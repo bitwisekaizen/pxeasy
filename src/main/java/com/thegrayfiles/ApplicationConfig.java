@@ -15,6 +15,8 @@ public class ApplicationConfig {
     @Value("${kickstart.path}")
     private String kickstartPath;
 
+    private String syslogPath = "/var/log/syslog";
+
     public String getPxePath() {
         return pxePath;
     }
@@ -38,5 +40,13 @@ public class ApplicationConfig {
 
     public void setKickstartPath(String kickstartPath) {
         this.kickstartPath = kickstartPath;
+    }
+
+    public void setSyslogPath(String syslogPath) {
+        this.syslogPath = syslogPath;
+    }
+
+    public String getSyslogPath() {
+        return syslogPath;
     }
 }

@@ -1,5 +1,6 @@
 package com.thegrayfiles.service;
 
+import com.thegrayfiles.ApplicationConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +11,13 @@ import java.util.Map;
 public class SyslogParserService {
 
     private PxeFileService pxeFileService;
+    private ApplicationConfig config;
     private Map<String, String> ipToMacFileMappings;
 
     @Autowired
-    public SyslogParserService(PxeFileService pxeFileService) {
+    public SyslogParserService(PxeFileService pxeFileService, ApplicationConfig config) {
         this.pxeFileService = pxeFileService;
+        this.config = config;
         this.ipToMacFileMappings = new HashMap<String, String>();
     }
 
