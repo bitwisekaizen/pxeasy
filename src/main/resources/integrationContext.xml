@@ -9,7 +9,7 @@
 
     <int:channel id="fromFileToParser"/>
 
-    <bean id="fileInboundChannelAdapter" class="com.thegrayfiles.MutatableOSDelegatingFileTailingMessageProducer">
+    <bean id="fileInboundChannelAdapter" class="org.springframework.integration.file.tail.MutatableOSDelegatingFileTailingMessageProducer">
         <property name="options" value="-F -n -1" />
         <property name="file" value="/var/log/syslog" />
         <property name="autoStartup" value="false" />

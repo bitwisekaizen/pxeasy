@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.thegrayfiles;
+package org.springframework.integration.file.tail;
 
-import org.springframework.integration.file.tail.FileTailingMessageProducerSupport;
 import org.springframework.messaging.MessagingException;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.TaskScheduler;
