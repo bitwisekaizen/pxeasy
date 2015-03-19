@@ -19,6 +19,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.client.RestTemplate;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -46,18 +47,23 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private RestTemplate template = new TestRestTemplate();
 
+    @BeforeMethod
+    public void setup() {
+        String pxePath = Files.createTempDir().getAbsolutePath();
+        config.setPxePath(pxePath);
+        String kickstartPath = Files.createTempDir().getAbsolutePath();
+        config.setKickstartPath(kickstartPath);
+    }
+
     @Test
     public void pxeSessionGeneratesMacConfigFile() throws IOException {
-        String pxePath = Files.createTempDir().getAbsolutePath();
         String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-
-        config.setPxePath(pxePath);
 
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 
-        File macAddressFile = new File(pxePath + "/" + macAddressFilename);
+        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
         macAddressFile.deleteOnExit();
         assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
 
@@ -72,7 +78,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     @Test
     public void pxeSessionGeneratesKickstartFile() throws IOException {
         String macAddress = "00:11:22:33:44:55";
-        String kickstartFilename = "/var/www/ks/auto-esxhost/" + macAddress.replaceAll("[:]", "-") + ".cfg";
+        String kickstartFilename = config.getKickstartPath() + macAddress.replaceAll("[:]", "-") + ".cfg";
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 
@@ -90,14 +96,14 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
         String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-        String kickstartFilename = "/var/www/ks/auto-esxhost/" + macAddress.replaceAll("[:]", "-") + ".cfg";
+        String kickstartFilename = config.getKickstartPath() + macAddress.replaceAll("[:]", "-") + ".cfg";
 
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 
         File kickstartFile = new File(kickstartFilename);
         kickstartFile.deleteOnExit();
-        File macAddressFile = new File("/tftpboot/pxe/pxelinux.cfg/" + macAddressFilename);
+        File macAddressFile = new File(config.getPxePath() + macAddressFilename);
         macAddressFile.deleteOnExit();
 
         File syslogFile = new File("/var/log/syslog");

@@ -8,8 +8,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ApplicationConfig {
-    @Value("${pxe.path:/default}")
+
+    @Value("${pxe.path}")
     private String pxePath;
+
+    @Value("${kickstart.path}")
+    private String kickstartPath;
 
     public String getPxePath() {
         return pxePath;
@@ -26,5 +30,13 @@ public class ApplicationConfig {
 
     public void setPxePath(String pxePath) {
         this.pxePath = pxePath;
+    }
+
+    public String getKickstartPath() {
+        return kickstartPath;
+    }
+
+    public void setKickstartPath(String kickstartPath) {
+        this.kickstartPath = kickstartPath;
     }
 }
