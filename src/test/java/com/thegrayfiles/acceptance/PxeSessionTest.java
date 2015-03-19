@@ -78,7 +78,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     @Test
     public void pxeSessionGeneratesKickstartFile() throws IOException {
         String macAddress = "00:11:22:33:44:55";
-        String kickstartFilename = config.getKickstartPath() + macAddress.replaceAll("[:]", "-") + ".cfg";
+        String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 

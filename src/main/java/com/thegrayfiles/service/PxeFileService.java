@@ -31,7 +31,7 @@ public class PxeFileService {
             tempFile.deleteOnExit();
             FileUtils.copyURLToFile(macTemplate.getURL(), tempFile);
             List<String> fileStrings = FileUtils.readLines(tempFile);
-            fileStrings.set(fileStrings.size() - 1, fileStrings.get(fileStrings.size() -1).replaceAll("test", macAddress.replaceAll("[:]", "-")));
+            fileStrings.set(fileStrings.size() - 1, fileStrings.get(fileStrings.size() - 1).replaceAll("test", macAddress.replaceAll("[:]", "-")));
             FileUtils.writeLines(convertMacAddressToFile(macAddress), fileStrings);
         } catch (IOException e) {
             Logger.getRootLogger().error(e);
@@ -44,7 +44,7 @@ public class PxeFileService {
 
     public void createKickstartConfiguration(String macAddress) {
         try {
-            FileUtils.copyURLToFile(kickstartTemplate.getURL(), new File("/var/www/ks/auto-esxhost/" + macAddress.replaceAll("[:]", "-") + ".cfg"));
+            FileUtils.copyURLToFile(kickstartTemplate.getURL(), new File(config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg"));
         } catch (IOException e) {
             Logger.getRootLogger().error(e);
         }
@@ -53,7 +53,7 @@ public class PxeFileService {
     public void deleteMacAddressConfiguration(String macAddressFile) {
         try {
             Logger.getRootLogger().info("Attempting to delete files.");
-            FileUtils.forceDelete(new File("/tftpboot/pxe/pxelinux.cfg/" + macAddressFile));
+            FileUtils.forceDelete(new File(config.getPxePath() + "/" + macAddressFile));
         } catch (IOException e) {
             Logger.getRootLogger().error(e);
         }
