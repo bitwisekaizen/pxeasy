@@ -48,8 +48,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private RestTemplate template = new TestRestTemplate();
 
-    private File syslogFile;
-
     @BeforeMethod
     public void setup() throws IOException {
         String pxePath = Files.createTempDir().getAbsolutePath();
@@ -97,34 +95,45 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test(timeOut = 5 * 1000)
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
-        syslogFile = File.createTempFile("sys", "log");
-        FileTailingMessageProducerSupport tailer = (FileTailingMessageProducerSupport) applicationContext.getBean("fileInboundChannelAdapter");
+        final File syslogFile = File.createTempFile("sys", "log");
+        final FileTailingMessageProducerSupport tailer = (FileTailingMessageProducerSupport) applicationContext.getBean("fileInboundChannelAdapter");
         tailer.stop();
-        tailer.setFile(syslogFile);
-        tailer.start();
+        tailer.stop(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        tailer.setFile(syslogFile);
+                        tailer.start();
 
-        String macAddress = "00:1a:2b:3c:4d:5e";
-        String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-        String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
+                        String macAddress = "00:1a:2b:3c:4d:5e";
+                        String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
+                        String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
-        ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
-        assertEquals(session.getStatusCode().value(), 200);
+                        ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
+                        assertEquals(session.getStatusCode().value(), 200);
 
-        File kickstartFile = new File(kickstartFilename);
-        kickstartFile.deleteOnExit();
-        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
-        macAddressFile.deleteOnExit();
+                        File kickstartFile = new File(kickstartFilename);
+                        kickstartFile.deleteOnExit();
+                        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
+                        macAddressFile.deleteOnExit();
 
-        String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
-        String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-5.5.0/tools.t00\n";
-        while (macAddressFile.exists()) {
-            FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
-            Thread.sleep(1000);
-            FileUtils.writeStringToFile(syslogFile, toolsSyslog);
-        }
+                        String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
+                        String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-5.5.0/tools.t00\n";
+                        while (macAddressFile.exists()) {
+                            try {
+                                FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
+                                Thread.sleep(1000);
+                                FileUtils.writeStringToFile(syslogFile, toolsSyslog);
+                            } catch (Exception e) {
+                                fail("Shouldn't throw exception when writing to file.", e);
+                            }
+                        }
 
-        assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
-        assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
+                        assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
+                        assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
+                    }
+                }
+        );
     }
 
     private ResponseEntity<PxeSessionResource> createPxeSessionForMacAddress(String macAddress) {
