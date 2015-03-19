@@ -28,9 +28,6 @@ public class PxeFileService {
             List<String> fileStrings = FileUtils.readLines(tempFile);
             fileStrings.set(fileStrings.size() - 1, fileStrings.get(fileStrings.size() -1).replaceAll("test", macAddress.replaceAll("[:]", "-")));
             FileUtils.writeLines(convertMacAddressToFile(macAddress), fileStrings);
-
-
-
         } catch (IOException e) {
             Logger.getRootLogger().error(e);
         }

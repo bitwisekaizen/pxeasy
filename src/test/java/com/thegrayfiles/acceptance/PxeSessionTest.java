@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 
 @SpringApplicationConfiguration(classes = Application.class)
@@ -59,12 +57,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         assertTrue(macAddressFileContent.get(macAddressFileContent.size() - 1).matches("^\\s+append.*?" + macAddress.replaceAll("[:]", "-")+ "\\.cfg$"),
                 "Unexpected last line of MAC address file: " + macAddressFileContent.get(macAddressFileContent.size() - 1));
-
     }
 
     @Test
     public void pxeSessionGeneratesKickstartFile() throws IOException {
-
         String macAddress = "00:11:22:33:44:55";
         String kickstartFilename = "/var/www/ks/auto-esxhost/" + macAddress.replaceAll("[:]", "-") + ".cfg";
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
