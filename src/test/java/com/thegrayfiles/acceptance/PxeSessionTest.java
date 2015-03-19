@@ -1,10 +1,13 @@
 package com.thegrayfiles.acceptance;
 
+import com.google.common.io.Files;
 import com.thegrayfiles.Application;
+import com.thegrayfiles.ApplicationConfig;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import com.thegrayfiles.resource.RootResource;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -38,16 +41,23 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     @Value("${local.server.port}")
     private int serverPort;
 
+    @Autowired
+    private ApplicationConfig config;
+
     private RestTemplate template = new TestRestTemplate();
 
     @Test
     public void pxeSessionGeneratesMacConfigFile() throws IOException {
+        String pxePath = Files.createTempDir().getAbsolutePath();
         String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
+
+        config.setPxePath(pxePath);
+
         ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddress(macAddress);
         assertEquals(session.getStatusCode().value(), 200);
 
-        File macAddressFile = new File("/tftpboot/pxe/pxelinux.cfg/" + macAddressFilename);
+        File macAddressFile = new File(pxePath + "/" + macAddressFilename);
         macAddressFile.deleteOnExit();
         assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
 

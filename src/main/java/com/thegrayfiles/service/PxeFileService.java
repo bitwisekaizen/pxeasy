@@ -1,7 +1,9 @@
 package com.thegrayfiles.service;
 
+import com.thegrayfiles.ApplicationConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +16,11 @@ public class PxeFileService {
 
     private ClassPathResource macTemplate;
     private ClassPathResource kickstartTemplate;
+    private ApplicationConfig config;
 
-    public PxeFileService() {
+    @Autowired
+    public PxeFileService(ApplicationConfig config) {
+        this.config = config;
         macTemplate = new ClassPathResource("mac");
         kickstartTemplate = new ClassPathResource("kickstart.cfg");
     }
@@ -34,7 +39,7 @@ public class PxeFileService {
     }
 
     private File convertMacAddressToFile(String macAddress) {
-        return new File("/tftpboot/pxe/pxelinux.cfg/01-" + macAddress.replaceAll("[:]", "-"));
+        return new File(config.getPxePath() + "/01-" + macAddress.replaceAll("[:]", "-"));
     }
 
     public void createKickstartConfiguration(String macAddress) {
