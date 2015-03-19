@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
 // See http://stackoverflow.com/questions/25537436/acceptance-testing-a-spring-boot-web-app-with-testng
 @TestExecutionListeners(inheritListeners = false, listeners = {
         DependencyInjectionTestExecutionListener.class,
-        DirtiesContextTestExecutionListener.class })
+        DirtiesContextTestExecutionListener.class})
 @Test
 public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
@@ -45,9 +45,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private ApplicationConfig config;
-
-    @Autowired
-    private FileTailingMessageProducerSupport tailer;
 
     private RestTemplate template = new TestRestTemplate();
 
@@ -59,10 +56,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         config.setPxePath(pxePath);
         String kickstartPath = Files.createTempDir().getAbsolutePath();
         config.setKickstartPath(kickstartPath);
-        syslogFile = File.createTempFile("sys", "log");
-        tailer.stop();
-        tailer.setFile(syslogFile);
-        tailer.start();
     }
 
     @Test
@@ -81,7 +74,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(macAddressFileContent.get(0).startsWith("default menu.c32"),
                 "Unexpected first line of MAC address file: " + macAddressFileContent.get(0));
 
-        assertTrue(macAddressFileContent.get(macAddressFileContent.size() - 1).matches("^\\s+append.*?" + macAddress.replaceAll("[:]", "-")+ "\\.cfg$"),
+        assertTrue(macAddressFileContent.get(macAddressFileContent.size() - 1).matches("^\\s+append.*?" + macAddress.replaceAll("[:]", "-") + "\\.cfg$"),
                 "Unexpected last line of MAC address file: " + macAddressFileContent.get(macAddressFileContent.size() - 1));
     }
 
@@ -102,8 +95,13 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
                 "Unexpected kickstart file content: " + kickstartFileContent);
     }
 
-    @Test(timeOut = 5*1000)
+    @Test(timeOut = 5 * 1000)
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
+        syslogFile = File.createTempFile("sys", "log");
+        FileTailingMessageProducerSupport tailer = (FileTailingMessageProducerSupport) applicationContext.getBean("fileInboundChannelAdapter");
+        tailer.setFile(syslogFile);
+        tailer.start();
+
         String macAddress = "00:1a:2b:3c:4d:5e";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
         String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";

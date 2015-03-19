@@ -9,11 +9,13 @@
 
     <int:channel id="fromFileToParser"/>
 
-    <int-file:tail-inbound-channel-adapter id="fileInboundChannelAdapter"
-                                           channel="fromFileToParser"
-                                           file="#{applicationConfig.syslogPath}"
-                                           native-options="-F -n -1"
-                                           file-delay="10000" />
+    <bean id="fileInboundChannelAdapter" class="com.thegrayfiles.MutatableOSDelegatingFileTailingMessageProducer">
+        <property name="options" value="-F -n -1" />
+        <property name="file" value="/var/log/syslog" />
+        <property name="autoStartup" value="false" />
+        <property name="tailAttemptsDelay" value="10000" />
+        <property name="outputChannel" ref="fromFileToParser" />
+    </bean>
 
     <int:outbound-channel-adapter ref="syslogParserService" method="parse" channel="fromFileToParser"/>
 </beans>
