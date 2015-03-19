@@ -99,6 +99,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException, InterruptedException {
         syslogFile = File.createTempFile("sys", "log");
         FileTailingMessageProducerSupport tailer = (FileTailingMessageProducerSupport) applicationContext.getBean("fileInboundChannelAdapter");
+        tailer.stop();
         tailer.setFile(syslogFile);
         tailer.start();
 
