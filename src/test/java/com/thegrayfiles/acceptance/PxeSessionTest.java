@@ -51,13 +51,15 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private RestTemplate template = new TestRestTemplate();
 
+    private File syslogFile;
+
     @BeforeMethod
     public void setup() throws IOException {
         String pxePath = Files.createTempDir().getAbsolutePath();
         config.setPxePath(pxePath);
         String kickstartPath = Files.createTempDir().getAbsolutePath();
         config.setKickstartPath(kickstartPath);
-        File syslogFile = File.createTempFile("sys", "log");
+        syslogFile = File.createTempFile("sys", "log");
         tailer.stop();
         tailer.setFile(syslogFile);
         tailer.start();
@@ -114,7 +116,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
         macAddressFile.deleteOnExit();
 
-        File syslogFile = new File(config.getSyslogPath());
         String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
         String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-5.5.0/tools.t00\n";
         while (macAddressFile.exists()) {
