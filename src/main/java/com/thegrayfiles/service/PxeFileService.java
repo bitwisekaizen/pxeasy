@@ -46,11 +46,12 @@ public class PxeFileService {
         return new File(config.getPxePath() + "/01-" + macAddress.replaceAll("[:]", "-"));
     }
 
-    public void createKickstartConfiguration(String macAddress, String ip) {
+    public void createKickstartConfiguration(String macAddress, String ip, String password) {
         try {
             Map<String, Object> scopes = new HashMap<String, Object>();
             scopes.put("ip", ip);
             scopes.put("hostname", "localhost");
+            scopes.put("password", password);
             FileOutputStream fos = new FileOutputStream(new File(config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg"));
             Writer writer = new OutputStreamWriter(fos);
             MustacheFactory mf = new DefaultMustacheFactory();

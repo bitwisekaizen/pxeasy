@@ -26,10 +26,11 @@ public class PxeSessionController {
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
         String macAddress = request.getMacAddress();
         String ip = request.getIp();
+        String password = request.getPassword();
         PxeSessionResource session = new PxeSessionResource(macAddress);
         session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
         fileCreator.createMacAddressConfiguration(macAddress);
-        fileCreator.createKickstartConfiguration(macAddress, ip);
+        fileCreator.createKickstartConfiguration(macAddress, ip, password);
         return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
     }
 

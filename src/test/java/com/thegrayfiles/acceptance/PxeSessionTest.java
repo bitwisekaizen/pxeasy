@@ -60,9 +60,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     public void pxeSessionGeneratesMacConfigFile() throws IOException {
         String macAddress = "00:1a:2b:3c:4d:5e";
         String ip = "1.2.3.4";
+        String password = "somsmgomsg";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
 
-        ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddressAndIp(macAddress, ip);
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, ip, password);
         assertEquals(session.getStatusCode().value(), 200);
 
         File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
@@ -81,9 +82,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     public void pxeSessionGeneratesKickstartFile() throws IOException {
         String macAddress = "00:11:22:33:44:55";
         String ip = "1.2.3.4";
+        String password = "moo";
         String defaultHostname = "localhost";
         String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
-        ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddressAndIp(macAddress, ip);
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, ip, password);
         assertEquals(session.getStatusCode().value(), 200);
 
         File kickstartFile = new File(kickstartFilename);
@@ -94,6 +96,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
         assertTrue(kickstartFileContent.startsWith("accepteula"),
                 "Unexpected kickstart file content: " + kickstartFileContent);
+        assertTrue(kickstartFileContent.matches(".*?rootpw " + password + ".*"), "Root password should be set to " + password);
         assertTrue(kickstartFileContent.matches(".*?network.*?--ip=" + ip + ".*"), "Kickstart should contain --ip=" + ip);
         assertTrue(kickstartFileContent.matches(".*?network.*?--hostname=" + defaultHostname + ".*"), "Kickstart should contain --hostname=localhost");
     }
@@ -111,11 +114,12 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
                         tailer.start();
 
                         String macAddress = "00:1a:2b:3c:4d:5e";
-                        String ip="1.2.3.4";
+                        String ip = "1.2.3.4";
+                        String password = "something";
                         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
                         String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
-                        ResponseEntity<PxeSessionResource> session = createPxeSessionForMacAddressAndIp(macAddress, ip);
+                        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, ip, password);
                         assertEquals(session.getStatusCode().value(), 200);
 
                         File kickstartFile = new File(kickstartFilename);
@@ -142,9 +146,9 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         );
     }
 
-    private ResponseEntity<PxeSessionResource> createPxeSessionForMacAddressAndIp(String macAddress, String ip) {
+    private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress, String ip, String password) {
         String url = "http://127.0.0.1:" + serverPort;
         RootResource root = template.getForEntity(url, RootResource.class).getBody();
-        return template.postForEntity(root.getLink("session").getHref(), new PxeSessionRequestResource(macAddress, ip), PxeSessionResource.class);
+        return template.postForEntity(root.getLink("session").getHref(), new PxeSessionRequestResource(macAddress, ip, password), PxeSessionResource.class);
     }
 }
