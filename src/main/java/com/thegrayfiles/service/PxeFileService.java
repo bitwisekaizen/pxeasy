@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -31,12 +30,14 @@ public class PxeFileService {
 
     public void createMacAddressConfiguration(String macAddress) {
         try {
-            File tempFile = File.createTempFile("temp", "file");
-            tempFile.deleteOnExit();
-            FileUtils.copyURLToFile(macTemplate.getURL(), tempFile);
-            List<String> fileStrings = FileUtils.readLines(tempFile);
-            fileStrings.set(fileStrings.size() - 1, fileStrings.get(fileStrings.size() - 1).replaceAll("test", macAddress.replaceAll("[:]", "-")));
-            FileUtils.writeLines(convertMacAddressToFile(macAddress), fileStrings);
+            Map<String, Object> scopes = new HashMap<String, Object>();
+            scopes.put("kickstartFile", macAddress.replaceAll("[:]", "-") + ".cfg");
+            FileOutputStream fos = new FileOutputStream(convertMacAddressToFile(macAddress));
+            Writer writer = new OutputStreamWriter(fos);
+            MustacheFactory mf = new DefaultMustacheFactory();
+            Mustache mustache = mf.compile(new InputStreamReader(macTemplate.getInputStream()), "mac");
+            mustache.execute(writer, scopes);
+            writer.flush();
         } catch (IOException e) {
             Logger.getRootLogger().error(e);
         }
