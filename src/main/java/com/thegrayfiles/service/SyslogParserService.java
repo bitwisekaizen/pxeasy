@@ -23,7 +23,7 @@ public class SyslogParserService {
 
     public void parse(String line) {
         String macAddressFileRegexp = ".*?RRQ from (.*?) filename.*?pxelinux.cfg/(01(?:-[\\da-fA-F]{2}){6}).*";
-        String toolsRegexp = ".*?RRQ from (.*?) .*?pxe/esxi-.*?/tools.t00";
+        String toolsRegexp = ".*?RRQ from (.*?) .*?pxe/(.*?)/tools.t00";
         if (line.matches(macAddressFileRegexp)) {
             ipToMacFileMappings.put(line.replaceAll(macAddressFileRegexp, "$1"), line.replaceAll(macAddressFileRegexp, "$2"));
         } else if (line.matches(toolsRegexp)) {
