@@ -132,7 +132,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         return template.postForEntity(root.getLink("session").getHref(), request, PxeSessionResource.class);
     }
 
-    @Test(timeOut = 5 * 1000)
+    @Test(timeOut = 10 * 1000)
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException {
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.1");
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.5");
