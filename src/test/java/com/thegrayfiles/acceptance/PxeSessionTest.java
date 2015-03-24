@@ -3,6 +3,7 @@ package com.thegrayfiles.acceptance;
 import com.google.common.io.Files;
 import com.thegrayfiles.Application;
 import com.thegrayfiles.ApplicationConfig;
+import com.thegrayfiles.builder.EsxConfigurationResourceBuilder;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import com.thegrayfiles.resource.RootResource;
@@ -27,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static com.thegrayfiles.builder.EsxConfigurationResourceBuilder.anEsxConfiguration;
+import static com.thegrayfiles.builder.PxeSessionRequestResourceBuilder.aSessionRequest;
 import static org.testng.Assert.*;
 
 
@@ -63,7 +66,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String password = "somsmgomsg";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
 
-        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, ip, password);
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
         assertEquals(session.getStatusCode().value(), 200);
 
         File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
@@ -85,7 +88,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String password = "moo";
         String defaultHostname = "localhost";
         String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
-        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, ip, password);
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
         assertEquals(session.getStatusCode().value(), 200);
 
         File kickstartFile = new File(kickstartFilename);
@@ -99,6 +102,34 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(kickstartFileContent.matches(".*?rootpw " + password + ".*"), "Root password should be set to " + password);
         assertTrue(kickstartFileContent.matches(".*?network.*?--ip=" + ip + ".*"), "Kickstart should contain --ip=" + ip);
         assertTrue(kickstartFileContent.matches(".*?network.*?--hostname=" + defaultHostname + ".*"), "Kickstart should contain --hostname=localhost");
+    }
+
+    @Test
+    public void canGeneratePxeConfigForSpecificVersionOfEsx() throws IOException {
+        generatePxeConfigForEsxVersion("5.1");
+        generatePxeConfigForEsxVersion("5.5");
+    }
+
+    private void generatePxeConfigForEsxVersion(String version) throws IOException {
+        String macAddress = "00:11:22:33:44:55";
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withVersion(version));
+        assertEquals(session.getStatusCode().value(), 200);
+
+        String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
+        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
+        macAddressFile.deleteOnExit();
+
+        String content = FileUtils.readFileToString(macAddressFile).replaceAll("[\\n\\r]", " ");
+        assertTrue(content.matches(".*?menu.*?" + version + ".*?kernel.*"), "Expected ESX version in menu line.");
+        assertTrue(content.matches(".*?kernel.*?esxi-" + version + ".*?append.*"), "Expected ESX version in kernel line.");
+        assertTrue(content.matches(".*?append.*?esxi-" + version + ".*"), "Expected ESX version in append line.");
+    }
+
+    private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress, EsxConfigurationResourceBuilder esxConfigBuilder) {
+        String url = "http://127.0.0.1:" + serverPort;
+        PxeSessionRequestResource request = aSessionRequest(macAddress).withEsxConfiguration(esxConfigBuilder).build();
+        RootResource root = template.getForEntity(url, RootResource.class).getBody();
+        return template.postForEntity(root.getLink("session").getHref(), request, PxeSessionResource.class);
     }
 
     @Test(timeOut = 5 * 1000)
@@ -119,7 +150,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
                 String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
                 String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
-                ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, ip, password);
+                ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
                 assertEquals(session.getStatusCode().value(), 200);
 
                 File kickstartFile = new File(kickstartFilename);
@@ -145,9 +176,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         });
     }
 
-    private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress, String ip, String password) {
-        String url = "http://127.0.0.1:" + serverPort;
-        RootResource root = template.getForEntity(url, RootResource.class).getBody();
-        return template.postForEntity(root.getLink("session").getHref(), new PxeSessionRequestResource(macAddress, ip, password), PxeSessionResource.class);
+    private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress) {
+        return createPxeSession(macAddress, anEsxConfiguration());
     }
 }

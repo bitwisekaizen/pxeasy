@@ -1,5 +1,6 @@
 package com.thegrayfiles.controller;
 
+import com.thegrayfiles.resource.EsxConfigurationResource;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import com.thegrayfiles.service.PxeFileService;
@@ -24,9 +25,10 @@ public class PxeSessionController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
+        EsxConfigurationResource esxConfig = request.getConfig();
         String macAddress = request.getMacAddress();
-        String ip = request.getIp();
-        String password = request.getPassword();
+        String ip = esxConfig.getIp();
+        String password = esxConfig.getPassword();
         PxeSessionResource session = new PxeSessionResource(macAddress);
         session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
         fileCreator.createMacAddressConfiguration(macAddress);

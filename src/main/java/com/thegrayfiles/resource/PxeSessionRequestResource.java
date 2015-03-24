@@ -6,25 +6,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class PxeSessionRequestResource {
 
     private String macAddress;
-    private String ip;
-    private String password;
+    private EsxConfigurationResource config;
 
     @JsonCreator
-    public PxeSessionRequestResource(@JsonProperty("macAddress") String macAddress, @JsonProperty("ip") String ip, @JsonProperty("password") String password) {
+    public PxeSessionRequestResource(@JsonProperty("macAddress") String macAddress, @JsonProperty("esxConfig") EsxConfigurationResource config) {
         this.macAddress = macAddress;
-        this.ip = ip;
-        this.password = password;
+        this.config = config;
     }
 
     public String getMacAddress() {
         return macAddress;
     }
 
-    public String getIp() {
-        return ip;
-    }
-
-    public String getPassword() {
-        return password;
+    public EsxConfigurationResource getConfig() {
+        return config;
     }
 }
