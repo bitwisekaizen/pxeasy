@@ -106,7 +106,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canGeneratePxeConfigForSpecificVersionOfEsx() throws IOException {
-        //generatePxeConfigForEsxVersion("5.1");
+        generatePxeConfigForEsxVersion("5.1");
         generatePxeConfigForEsxVersion("5.5");
     }
 

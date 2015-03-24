@@ -28,10 +28,11 @@ public class PxeFileService {
         kickstartTemplate = new ClassPathResource("kickstart.cfg");
     }
 
-    public void createMacAddressConfiguration(String macAddress) {
+    public void createMacAddressConfiguration(String macAddress, String version) {
         try {
             Map<String, Object> scopes = new HashMap<String, Object>();
             scopes.put("kickstartFile", macAddress.replaceAll("[:]", "-") + ".cfg");
+            scopes.put("version", version);
             FileOutputStream fos = new FileOutputStream(convertMacAddressToFile(macAddress));
             Writer writer = new OutputStreamWriter(fos);
             MustacheFactory mf = new DefaultMustacheFactory();

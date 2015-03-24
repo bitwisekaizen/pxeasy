@@ -19,8 +19,8 @@ public class PxeSessionController {
     private PxeFileService fileCreator;
 
     @Autowired
-    public PxeSessionController(PxeFileService fileCreator) {
-        this.fileCreator = fileCreator;
+    public PxeSessionController(PxeFileService fileService) {
+        this.fileCreator = fileService;
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -29,9 +29,10 @@ public class PxeSessionController {
         String macAddress = request.getMacAddress();
         String ip = esxConfig.getIp();
         String password = esxConfig.getPassword();
+        String version = esxConfig.getVersion();
         PxeSessionResource session = new PxeSessionResource(macAddress);
         session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
-        fileCreator.createMacAddressConfiguration(macAddress);
+        fileCreator.createMacAddressConfiguration(macAddress, version);
         fileCreator.createKickstartConfiguration(macAddress, ip, password);
         return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
     }
