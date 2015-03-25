@@ -12,6 +12,7 @@
         <property name="file" value="/var/log/syslog" />
         <property name="tailAttemptsDelay" value="10000" />
         <property name="outputChannel" ref="fromFileToParser" />
+        <property name="autoStartup" value="${tail.autoStartup:true}" />
     </bean>
 
     <int:outbound-channel-adapter ref="syslogParserService" method="parse" channel="fromFileToParser"/>

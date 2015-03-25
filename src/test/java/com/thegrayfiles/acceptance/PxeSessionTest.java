@@ -16,6 +16,7 @@ import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.integration.file.tail.FileTailingMessageProducerSupport;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -41,6 +42,7 @@ import static org.testng.Assert.*;
         DependencyInjectionTestExecutionListener.class,
         DirtiesContextTestExecutionListener.class})
 @Test
+@TestPropertySource(properties = "tail.autoStartup = false")
 public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Value("${local.server.port}")
@@ -50,6 +52,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     private ApplicationConfig config;
 
     private RestTemplate template = new TestRestTemplate();
+
+    @Autowired
+    private FileTailingMessageProducerSupport tailer;
+
 
     @BeforeMethod
     public void setup() throws IOException {
@@ -132,7 +138,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         return template.postForEntity(root.getLink("session").getHref(), request, PxeSessionResource.class);
     }
 
-    @Test(timeOut = 10 * 1000)
+    @Test(timeOut = 5 * 1000)
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException {
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.1");
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.5");
@@ -140,42 +146,41 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private void assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion(final String version) throws IOException {
         final File syslogFile = File.createTempFile("sys", "log");
-        final FileTailingMessageProducerSupport tailer = applicationContext.getBean("fileInboundChannelAdapter",
-                FileTailingMessageProducerSupport.class);
-        tailer.stop();
-        tailer.setFile(syslogFile);
-        tailer.start();
+        tailer.stop(new Runnable() {
+            @Override
+            public void run() {
+                tailer.setFile(syslogFile);
+                tailer.start();
 
-        String macAddress = "00:1a:2b:3c:4d:5" + version.replaceAll("^\\d\\.(\\d).*$", "$1");
-        String ip = "1.2.3.4";
-        String password = "something";
-        String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-        String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
+                String macAddress = "00:1a:2b:3c:4d:5" + version.replaceAll("^\\d\\.(\\d).*$", "$1");
+                String ip = "1.2.3.4";
+                String password = "something";
+                String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
+                String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
-        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
-        assertEquals(session.getStatusCode().value(), 200);
+                ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
+                assertEquals(session.getStatusCode().value(), 200);
 
-        File kickstartFile = new File(kickstartFilename);
-        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
-        assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
+                File kickstartFile = new File(kickstartFilename);
+                File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
+                assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
 
-        String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
-        String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-" + version + "/tools.t00\n";
-        while (macAddressFile.exists()) {
-            try {
-                FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
-                Thread.sleep(1000);
-                FileUtils.writeStringToFile(syslogFile, toolsSyslog);
-            } catch (Exception e) {
-                fail("Shouldn't throw exception when writing to file.", e);
+                String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
+                String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-" + version + "/tools.t00\n";
+                while (macAddressFile.exists()) {
+                    try {
+                        FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
+                        Thread.sleep(1000);
+                        FileUtils.writeStringToFile(syslogFile, toolsSyslog);
+                    } catch (Exception e) {
+                        fail("Shouldn't throw exception when writing to file.", e);
+                    }
+                }
+
+                assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
+                assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
+
             }
-        }
-
-        assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
-        assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
-    }
-
-    private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress) {
-        return createPxeSession(macAddress, anEsxConfiguration());
+        });
     }
 }
