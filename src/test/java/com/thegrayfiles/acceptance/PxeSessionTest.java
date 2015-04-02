@@ -112,6 +112,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canGeneratePxeConfigForSpecificVersionOfEsx() throws IOException {
+        generatePxeConfigForEsxVersion("5.0");
         generatePxeConfigForEsxVersion("5.1");
         generatePxeConfigForEsxVersion("5.5");
     }
@@ -140,6 +141,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test(timeOut = 5 * 1000)
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException {
+        assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.0");
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.1");
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.5");
     }
