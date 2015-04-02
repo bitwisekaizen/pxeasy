@@ -66,6 +66,24 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void canFetchSessionDetails() {
+        String macAddress = "00:1a:2b:3c:4d:5e";
+
+        ResponseEntity<PxeSessionResource> createdSessionResponse = createPxeSession(macAddress, anEsxConfiguration());
+        assertEquals(createdSessionResponse.getStatusCode().value(), 200);
+
+        ResponseEntity<PxeSessionResource> fetchedSessionResponse = getPxeSessionByUuid(createdSessionResponse.getBody().getUuid());
+        assertEquals(fetchedSessionResponse.getStatusCode().value(), 200);
+
+        PxeSessionResource createdSession = createdSessionResponse.getBody();
+        PxeSessionResource fetchedSession = fetchedSessionResponse.getBody();
+
+        assertNotNull(fetchedSession, "Fetched session should not be null.");
+        assertEquals(fetchedSession.getUuid(), createdSession.getUuid());
+        assertEquals(fetchedSession.getMacAddress(), createdSession.getUuid());
+    }
+
+    @Test
     public void pxeSessionGeneratesMacConfigFile() throws IOException {
         String macAddress = "00:1a:2b:3c:4d:5e";
         String ip = "1.2.3.4";
@@ -133,10 +151,21 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     }
 
     private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress, EsxConfigurationResourceBuilder esxConfigBuilder) {
-        String url = "http://127.0.0.1:" + serverPort;
         PxeSessionRequestResource request = aSessionRequest(macAddress).withEsxConfiguration(esxConfigBuilder).build();
-        RootResource root = template.getForEntity(url, RootResource.class).getBody();
-        return template.postForEntity(root.getLink("session").getHref(), request, PxeSessionResource.class);
+        return template.postForEntity(getSessionHref(), request, PxeSessionResource.class);
+    }
+
+    private ResponseEntity<PxeSessionResource> getPxeSessionByUuid(String uuid) {
+        return template.getForEntity(getRootResource().getLink("session").getHref() + "/" + uuid, PxeSessionResource.class);
+    }
+
+    private String getSessionHref() {
+        return getRootResource().getLink("session").getHref();
+    }
+
+    private RootResource getRootResource() {
+        String url = "http://127.0.0.1:" + serverPort;
+        return template.getForEntity(url, RootResource.class).getBody();
     }
 
     @Test(timeOut = 5 * 1000)
