@@ -3,7 +3,7 @@ package com.thegrayfiles.controller;
 import com.thegrayfiles.resource.EsxConfigurationResource;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
-import com.thegrayfiles.service.PxeFileService;
+import com.thegrayfiles.service.PxeSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,29 +16,24 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RequestMapping("session")
 public class PxeSessionController {
 
-    private PxeFileService fileCreator;
+    private PxeSessionService sessionService;
 
     @Autowired
-    public PxeSessionController(PxeFileService fileService) {
-        this.fileCreator = fileService;
+    public PxeSessionController(PxeSessionService fileService) {
+        this.sessionService = fileService;
     }
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
         EsxConfigurationResource esxConfig = request.getConfig();
         String macAddress = request.getMacAddress();
-        String ip = esxConfig.getIp();
-        String password = esxConfig.getPassword();
-        String version = esxConfig.getVersion();
-        PxeSessionResource session = new PxeSessionResource(macAddress);
+        PxeSessionResource session = sessionService.createSession(macAddress, esxConfig);
         session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
-        fileCreator.createMacAddressConfiguration(macAddress, version);
-        fileCreator.createKickstartConfiguration(macAddress, ip, password);
         return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
     public ResponseEntity<PxeSessionResource> getByUuid(@PathVariable String uuid) {
-        return null;
+        return new ResponseEntity<PxeSessionResource>(sessionService.getSession(uuid), HttpStatus.OK);
     }
 }

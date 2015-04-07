@@ -80,7 +80,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         assertNotNull(fetchedSession, "Fetched session should not be null.");
         assertEquals(fetchedSession.getUuid(), createdSession.getUuid());
-        assertEquals(fetchedSession.getMacAddress(), createdSession.getUuid());
+        assertEquals(fetchedSession.getMacAddress(), createdSession.getMacAddress());
     }
 
     @Test

@@ -4,6 +4,14 @@ import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class ApplicationConfig {
@@ -18,11 +26,7 @@ public class ApplicationConfig {
 
     @Bean
     public EmbeddedServletContainerFactory servletContainer() {
-        TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
-        //factory.setPort(9000);
-        //factory.setSessionTimeout(10, TimeUnit.MINUTES);
-        //factory.addErrorPages(new ErrorPage(HttpStatus.404, "/notfound.html"));
-        return factory;
+        return new TomcatEmbeddedServletContainerFactory();
     }
 
     public void setPxePath(String pxePath) {
@@ -35,5 +39,28 @@ public class ApplicationConfig {
 
     public void setKickstartPath(String kickstartPath) {
         this.kickstartPath = kickstartPath;
+    }
+
+    @Bean
+    public DataSource dataSource() {
+        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build();
+    }
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter) {
+        LocalContainerEntityManagerFactoryBean lef = new LocalContainerEntityManagerFactoryBean();
+        lef.setDataSource(dataSource);
+        lef.setJpaVendorAdapter(jpaVendorAdapter);
+        lef.setPackagesToScan("com.thegrayfiles.entity");
+        return lef;
+    }
+
+    @Bean
+    public JpaVendorAdapter jpaVendorAdapter() {
+        HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
+        hibernateJpaVendorAdapter.setShowSql(false);
+        hibernateJpaVendorAdapter.setGenerateDdl(true);
+        hibernateJpaVendorAdapter.setDatabase(Database.H2);
+        return hibernateJpaVendorAdapter;
     }
 }

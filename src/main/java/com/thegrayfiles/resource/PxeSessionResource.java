@@ -12,9 +12,9 @@ public class PxeSessionResource extends ResourceSupport {
     private String uuid;
 
     @JsonCreator
-    public PxeSessionResource(@JsonProperty("macAddress") String macAddress) {
+    public PxeSessionResource(@JsonProperty("macAddress") String macAddress, @JsonProperty("uuid") UUID uuid) {
         this.macAddress = macAddress;
-        this.uuid = UUID.randomUUID().toString();
+        this.uuid = uuid.toString();
     }
 
     public String getUuid() {
