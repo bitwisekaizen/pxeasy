@@ -56,7 +56,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private FileTailingMessageProducerSupport tailer;
 
-
     @BeforeMethod
     public void setup() throws IOException {
         String pxePath = Files.createTempDir().getAbsolutePath();
@@ -81,6 +80,24 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertNotNull(fetchedSession, "Fetched session should not be null.");
         assertEquals(fetchedSession.getUuid(), createdSession.getUuid());
         assertEquals(fetchedSession.getMacAddress(), createdSession.getMacAddress());
+    }
+
+    @Test
+    public void canFetchMultipleSessions() {
+        String firstMacAddress = "00:1a:2b:3c:4d:5e";
+        String secondMacAddress = "00:1a:2b:3c:4d:5f";
+
+        ResponseEntity<PxeSessionResource> firstResponse = createPxeSession(firstMacAddress, anEsxConfiguration());
+        ResponseEntity<PxeSessionResource> secondResponse = createPxeSession(secondMacAddress, anEsxConfiguration());
+
+        List<PxeSessionResource> sessions = getPxeSessions();
+        assertTrue(sessions.size() >= 2);
+        assertTrue(sessions.contains(firstResponse));
+        assertTrue(sessions.contains(secondResponse));
+    }
+
+    private List<PxeSessionResource> getPxeSessions() {
+        return template.getForObject(getRootResource().getLink("session").getHref(), List.class);
     }
 
     @Test

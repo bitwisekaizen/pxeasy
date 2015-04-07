@@ -6,7 +6,7 @@ import org.springframework.hateoas.ResourceSupport;
 
 import java.util.UUID;
 
-public class PxeSessionResource extends ResourceSupport {
+public class PxeSessionResource extends ResourceSupport implements Comparable<PxeSessionResource> {
 
     private final String macAddress;
     private String uuid;
@@ -23,5 +23,10 @@ public class PxeSessionResource extends ResourceSupport {
 
     public String getMacAddress() {
         return macAddress;
+    }
+
+    @Override
+    public int compareTo(PxeSessionResource session) {
+        return session.getUuid().compareTo(this.uuid);
     }
 }
