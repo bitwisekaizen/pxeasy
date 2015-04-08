@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -35,5 +37,10 @@ public class PxeSessionController {
     @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
     public ResponseEntity<PxeSessionResource> getByUuid(@PathVariable String uuid) {
         return new ResponseEntity<PxeSessionResource>(sessionService.getSession(uuid), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<PxeSessionResource>> getAllSessions() {
+        return new ResponseEntity<List<PxeSessionResource>>(sessionService.getAllSessions(), HttpStatus.OK);
     }
 }

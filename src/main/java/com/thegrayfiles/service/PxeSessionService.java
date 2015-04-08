@@ -7,6 +7,7 @@ import com.thegrayfiles.resource.PxeSessionResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,5 +34,13 @@ public class PxeSessionService {
     public PxeSessionResource getSession(String uuid) {
         SessionEntity entity = repository.findByUuid(uuid).get(0);
         return new PxeSessionResource(entity.getMacAddress(), UUID.fromString(entity.getUuid()));
+    }
+
+    public List<PxeSessionResource> getAllSessions() {
+        List<PxeSessionResource> list = new ArrayList<PxeSessionResource>();
+        for (SessionEntity session : repository.findAll()) {
+            list.add(new PxeSessionResource(session.getMacAddress(), UUID.fromString(session.getUuid())));
+        }
+        return list;
     }
 }

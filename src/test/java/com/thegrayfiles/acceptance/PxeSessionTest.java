@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.thegrayfiles.builder.EsxConfigurationResourceBuilder.anEsxConfiguration;
@@ -92,12 +93,12 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         List<PxeSessionResource> sessions = getPxeSessions();
         assertTrue(sessions.size() >= 2);
-        assertTrue(sessions.contains(firstResponse));
-        assertTrue(sessions.contains(secondResponse));
+        assertTrue(sessions.contains(firstResponse.getBody()));
+        assertTrue(sessions.contains(secondResponse.getBody()));
     }
 
     private List<PxeSessionResource> getPxeSessions() {
-        return template.getForObject(getRootResource().getLink("session").getHref(), List.class);
+        return Arrays.asList(template.getForObject(getRootResource().getLink("session").getHref(), PxeSessionResource[].class));
     }
 
     @Test
