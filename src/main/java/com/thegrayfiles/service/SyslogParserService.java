@@ -1,6 +1,7 @@
 package com.thegrayfiles.service;
 
 import com.thegrayfiles.ApplicationConfig;
+import com.thegrayfiles.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,14 +11,12 @@ import java.util.Map;
 @Service
 public class SyslogParserService {
 
-    private PxeFileService pxeFileService;
-    private ApplicationConfig config;
     private Map<String, String> ipToMacFileMappings;
+    private PxeSessionService sessionService;
 
     @Autowired
-    public SyslogParserService(PxeFileService pxeFileService, ApplicationConfig config) {
-        this.pxeFileService = pxeFileService;
-        this.config = config;
+    public SyslogParserService(PxeSessionService sessionService) {
+        this.sessionService = sessionService;
         this.ipToMacFileMappings = new HashMap<String, String>();
     }
 
@@ -30,7 +29,7 @@ public class SyslogParserService {
             String macFile = ipToMacFileMappings.remove(line.replaceAll(toolsRegexp, "$1"));
             // not thread safe
             if (macFile != null) {
-                pxeFileService.deleteMacAddressConfiguration(macFile);
+                sessionService.deleteByMacAddress(macFile.replaceAll("^01-(.*)", "$1").replaceAll("-", ":"));
             }
         }
     }

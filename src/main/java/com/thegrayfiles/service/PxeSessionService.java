@@ -1,17 +1,20 @@
 package com.thegrayfiles.service;
 
 import com.thegrayfiles.entity.SessionEntity;
+import com.thegrayfiles.exception.SessionNotFound;
 import com.thegrayfiles.repository.SessionRepository;
 import com.thegrayfiles.resource.EsxConfigurationResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class PxeSessionService {
 
     private PxeFileService fileService;
@@ -31,8 +34,12 @@ public class PxeSessionService {
         return new PxeSessionResource(macAddress, UUID.fromString(entity.getUuid()));
     }
 
-    public PxeSessionResource getSession(String uuid) {
-        SessionEntity entity = repository.findByUuid(uuid).get(0);
+    public PxeSessionResource getSession(String uuid) throws SessionNotFound {
+        List<SessionEntity> sessions = repository.findByUuid(uuid);
+        if (sessions.size() == 0) {
+            throw new SessionNotFound(uuid);
+        }
+        SessionEntity entity = sessions.get(0);
         return new PxeSessionResource(entity.getMacAddress(), UUID.fromString(entity.getUuid()));
     }
 
@@ -42,5 +49,16 @@ public class PxeSessionService {
             list.add(new PxeSessionResource(session.getMacAddress(), UUID.fromString(session.getUuid())));
         }
         return list;
+    }
+
+    public void delete(String uuid) {
+        SessionEntity entity = repository.findByUuid(uuid).get(0);
+        repository.deleteByMacAddress(entity.getMacAddress());
+        // @todo change file api
+        fileService.deleteMacAddressConfiguration("01-" + entity.getMacAddress().replaceAll("[:]", "-"));
+    }
+
+    public void deleteByMacAddress(String macAddress) {
+        delete(repository.findByMacAddress(macAddress).get(0).getUuid());
     }
 }

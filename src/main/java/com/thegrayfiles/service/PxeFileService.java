@@ -4,6 +4,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.thegrayfiles.ApplicationConfig;
+import com.thegrayfiles.repository.SessionRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,12 @@ public class PxeFileService {
     private ClassPathResource macTemplate;
     private ClassPathResource kickstartTemplate;
     private ApplicationConfig config;
+    private SessionRepository repository;
 
     @Autowired
-    public PxeFileService(ApplicationConfig config) {
+    public PxeFileService(ApplicationConfig config, SessionRepository repository) {
         this.config = config;
+        this.repository = repository;
         macTemplate = new ClassPathResource("mac");
         kickstartTemplate = new ClassPathResource("kickstart.cfg");
     }

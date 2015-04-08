@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface SessionRepository extends CrudRepository<SessionEntity, Long> {
     List<SessionEntity> findByUuid(String uuid);
+
+    void deleteByMacAddress(String macAddress);
+
+    List<SessionEntity> findByMacAddress(String macAddress);
 }
