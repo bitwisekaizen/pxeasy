@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.integration.file.tail.FileTailingMessageProducerSupport;
 import org.springframework.test.context.TestExecutionListeners;
@@ -195,41 +196,38 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private void assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion(final String version) throws IOException {
         final File syslogFile = File.createTempFile("sys", "log");
-        tailer.stop(new Runnable() {
-            @Override
-            public void run() {
-                tailer.setFile(syslogFile);
-                tailer.start();
+        tailer.stop();
+        tailer.setFile(syslogFile);
+        tailer.start();
 
-                String macAddress = "00:1a:2b:3c:4d:5" + version.replaceAll("^\\d\\.(\\d).*$", "$1");
-                String ip = "1.2.3.4";
-                String password = "something";
-                String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
-                String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
+        String macAddress = "00:1a:2b:3c:4d:5" + version.replaceAll("^\\d\\.(\\d).*$", "$1");
+        String ip = "1.2.3.4";
+        String password = "something";
+        String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
+        String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
-                ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
-                assertEquals(session.getStatusCode().value(), 200);
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
+        assertEquals(session.getStatusCode().value(), 200);
 
-                File kickstartFile = new File(kickstartFilename);
-                File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
-                assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
+        File kickstartFile = new File(kickstartFilename);
+        File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
+        assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
 
-                String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
-                String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-" + version + "/tools.t00\n";
-                while (macAddressFile.exists()) {
-                    try {
-                        FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
-                        Thread.sleep(1000);
-                        FileUtils.writeStringToFile(syslogFile, toolsSyslog);
-                    } catch (Exception e) {
-                        fail("Shouldn't throw exception when writing to file.", e);
-                    }
-                }
-
-                assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
-                assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
-
+        String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
+        String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-" + version + "/tools.t00\n";
+        while (macAddressFile.exists()) {
+            try {
+                FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
+                Thread.sleep(1000);
+                FileUtils.writeStringToFile(syslogFile, toolsSyslog);
+            } catch (Exception e) {
+                fail("Shouldn't throw exception when writing to file.", e);
             }
-        });
+        }
+
+        assertTrue(kickstartFile.exists(), "Kickstart file " + kickstartFile.getAbsolutePath() + " should exist.");
+        assertFalse(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should not exist.");
+
+        assertEquals(getPxeSessionByUuid(session.getBody().getUuid()).getStatusCode(), HttpStatus.NOT_FOUND, "PXE session should be removed when file is removed.");
     }
 }
