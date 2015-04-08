@@ -7,7 +7,7 @@
 
     <int:channel id="fromFileToParser"/>
 
-    <bean id="fileInboundChannelAdapter" class="org.springframework.integration.file.tail.MutatableOSDelegatingFileTailingMessageProducer">
+    <bean id="fileInboundChannelAdapter" class="org.springframework.integration.file.tail.OSDelegatingFileTailingMessageProducer">
         <property name="options" value="-F -n -1" />
         <property name="file" value="/var/log/syslog" />
         <property name="tailAttemptsDelay" value="10000" />
