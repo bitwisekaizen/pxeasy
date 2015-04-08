@@ -1,12 +1,11 @@
 package com.thegrayfiles.service;
 
-import com.thegrayfiles.ApplicationConfig;
-import com.thegrayfiles.repository.SessionRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SyslogParserService {
@@ -17,7 +16,7 @@ public class SyslogParserService {
     @Autowired
     public SyslogParserService(PxeSessionService sessionService) {
         this.sessionService = sessionService;
-        this.ipToMacFileMappings = new HashMap<String, String>();
+        this.ipToMacFileMappings = new ConcurrentHashMap<String, String>();
     }
 
     public void parse(String line) {
