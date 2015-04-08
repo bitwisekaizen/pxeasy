@@ -7,6 +7,8 @@ import com.thegrayfiles.builder.EsxConfigurationResourceBuilder;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import com.thegrayfiles.resource.RootResource;
+import com.thegrayfiles.service.PxeFileService;
+import com.thegrayfiles.service.SyslogParserService;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -203,7 +205,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         template.delete(getRootResource().getLink("session").getHref() + "/" + resource.getUuid());
     }
 
-    @Test//(timeOut = 10 * 1000)
+    @Test(timeOut = 10 * 1000)
     public void configFilesDeletedWhenSyslogUpdatedWithMacAddress() throws IOException {
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.0");
         assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion("5.1");
@@ -219,6 +221,8 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private FileTailingMessageProducerSupport tailer;
 
+    @Autowired
+    private SyslogParserService parserService;
 
     class SpringIntegrationHelper implements Runnable {
 
@@ -257,8 +261,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
             String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
             String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-" + version + "/tools.t00\n";
             try {
-                FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
-                Thread.sleep(1000);
+                while (!parserService.isMacAddressDetected()) {
+                    FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
+                    Thread.sleep(1000);
+                }
                 FileUtils.writeStringToFile(syslogFile, toolsSyslog);
             } catch (Exception e) {
                 e.printStackTrace();

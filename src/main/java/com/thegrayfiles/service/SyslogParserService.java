@@ -12,6 +12,7 @@ public class SyslogParserService {
 
     private Map<String, String> ipToMacFileMappings;
     private PxeSessionService sessionService;
+    private boolean macAddressDetected;
 
     @Autowired
     public SyslogParserService(PxeSessionService sessionService) {
@@ -24,6 +25,7 @@ public class SyslogParserService {
         String toolsRegexp = ".*?RRQ from (.*?) .*?pxe/(.*?)/tools.t00";
         if (line.matches(macAddressFileRegexp)) {
             ipToMacFileMappings.put(line.replaceAll(macAddressFileRegexp, "$1"), line.replaceAll(macAddressFileRegexp, "$2"));
+            macAddressDetected = true;
         } else if (line.matches(toolsRegexp)) {
             String macFile = ipToMacFileMappings.remove(line.replaceAll(toolsRegexp, "$1"));
             // not thread safe
@@ -31,5 +33,11 @@ public class SyslogParserService {
                 sessionService.deleteByMacAddress(macFile.replaceAll("^01-(.*)", "$1").replaceAll("-", ":"));
             }
         }
+    }
+
+    public boolean isMacAddressDetected() {
+        boolean macAddressDetected = this.macAddressDetected;
+        this.macAddressDetected = false;
+        return macAddressDetected;
     }
 }
