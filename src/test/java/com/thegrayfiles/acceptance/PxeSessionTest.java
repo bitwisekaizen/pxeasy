@@ -132,7 +132,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String password = "moo";
         String hostname = "somehost";
         String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
-        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password).withGateway(gateway).withNetmask(netmask).withHostname(hostname));
         assertEquals(session.getStatusCode().value(), 200);
 
         File kickstartFile = new File(kickstartFilename);
@@ -146,8 +146,8 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(kickstartFileContent.matches(".*?rootpw " + password + ".*"), "Root password should be set to " + password);
         assertTrue(kickstartFileContent.matches(".*?network.*?--ip=" + ip + ".*"), "Kickstart should contain --ip=" + ip);
         assertTrue(kickstartFileContent.matches(".*?network.*?--hostname=" + hostname + ".*"), "Kickstart should contain --hostname=" + hostname);
-        assertTrue(kickstartFileContent.matches(".*?network.*?--hostname=" + gateway + ".*"), "Kickstart should contain --gateway=" + gateway);
-        assertTrue(kickstartFileContent.matches(".*?network.*?--hostname=" + netmask + ".*"), "Kickstart should contain --netmask=" + netmask);
+        assertTrue(kickstartFileContent.matches(".*?network.*?--gateway=" + gateway + ".*"), "Kickstart should contain --gateway=" + gateway);
+        assertTrue(kickstartFileContent.matches(".*?network.*?--netmask=" + netmask + ".*"), "Kickstart should contain --netmask=" + netmask);
     }
 
     @Test

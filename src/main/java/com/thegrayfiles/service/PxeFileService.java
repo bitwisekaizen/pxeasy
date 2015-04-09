@@ -5,6 +5,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.thegrayfiles.ApplicationConfig;
 import com.thegrayfiles.repository.SessionRepository;
+import com.thegrayfiles.resource.EsxConfigurationResource;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,12 +52,14 @@ public class PxeFileService {
         return new File(config.getPxePath() + "/01-" + macAddress.replaceAll("[:]", "-"));
     }
 
-    public void createKickstartConfiguration(String macAddress, String ip, String password) {
+    public void createKickstartConfiguration(String macAddress, EsxConfigurationResource esxConfig) {
         try {
             Map<String, Object> scopes = new HashMap<String, Object>();
-            scopes.put("ip", ip);
-            scopes.put("hostname", "localhost");
-            scopes.put("password", password);
+            scopes.put("ip", esxConfig.getIp());
+            scopes.put("hostname", esxConfig.getHostname());
+            scopes.put("password", esxConfig.getPassword());
+            scopes.put("gateway", esxConfig.getGateway());
+            scopes.put("netmask", esxConfig.getNetmask());
             FileOutputStream fos = new FileOutputStream(new File(config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg"));
             Writer writer = new OutputStreamWriter(fos);
             MustacheFactory mf = new DefaultMustacheFactory();

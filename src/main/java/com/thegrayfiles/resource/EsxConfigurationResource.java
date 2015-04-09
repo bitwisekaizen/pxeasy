@@ -8,6 +8,9 @@ public class EsxConfigurationResource {
     private String ip;
     private String password;
     private String version;
+    private String gateway;
+    private String netmask;
+    private String hostname;
 
     @JsonCreator
     public EsxConfigurationResource() {
@@ -39,5 +42,29 @@ public class EsxConfigurationResource {
     @JsonProperty("version")
     public String getVersion() {
         return version;
+    }
+
+    public void setGateway(String gateway) {
+        this.gateway = gateway;
+    }
+
+    public void setNetmask(String netmask) {
+        this.netmask = netmask;
+    }
+
+    public String getNetmask() {
+        return netmask;
+    }
+
+    public String getGateway() {
+        return gateway;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 }

@@ -28,7 +28,7 @@ public class PxeSessionService {
 
     public PxeSessionResource createSession(String macAddress, EsxConfigurationResource config) {
         fileService.createMacAddressConfiguration(macAddress, config.getVersion());
-        fileService.createKickstartConfiguration(macAddress, config.getIp(), config.getPassword());
+        fileService.createKickstartConfiguration(macAddress, config);
         SessionEntity entity = new SessionEntity(macAddress);
         repository.save(entity);
         return new PxeSessionResource(macAddress, UUID.fromString(entity.getUuid()));
