@@ -214,7 +214,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private void assertConfigFilesDeletedWhenSyslogUpdatedForEsxVersion(final String version) throws IOException {
         SpringIntegrationHelper helper = new SpringIntegrationHelper(version);
-
         helper.verifyAssertions();
     }
 
@@ -236,9 +235,9 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
             this.syslogFile = File.createTempFile("sys", "log");
             this.version = version;
             tailer.setFile(syslogFile);
-            tailer.stop();
             tailer.start();
-            tailer.stop(this);
+            this.run();
+            tailer.stop();
         }
 
         @Override
@@ -256,21 +255,20 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
             File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
             assertTrue(macAddressFile.exists(), "Mac Address file " + macAddressFile.getAbsolutePath() + " should exist.");
 
-            while(!tailer.isRunning());
-
             String macAddressSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/pxelinux.cfg/" + macAddressFilename + "\n";
             String toolsSyslog = "Mar 15 11:41:49 pxe in.tftpd[7034]: RRQ from 10.100.12.178 filename pxe/esxi-" + version + "/tools.t00\n";
             try {
                 while (!parserService.isMacAddressDetected()) {
                     FileUtils.writeStringToFile(syslogFile, macAddressSyslog);
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 }
-                FileUtils.writeStringToFile(syslogFile, toolsSyslog);
+                while (!parserService.isMacAddressFileRemoved()) {
+                    FileUtils.writeStringToFile(syslogFile, toolsSyslog, true);
+                    Thread.sleep(500);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            while (macAddressFile.exists());
 
             kickstartFileExists = kickstartFile.exists();
             macAddressFileExists = macAddressFile.exists();

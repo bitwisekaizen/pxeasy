@@ -10,9 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class SyslogParserService {
 
+    private Logger logger = Logger.getLogger(SyslogParserService.class);
+
     private Map<String, String> ipToMacFileMappings;
     private PxeSessionService sessionService;
     private boolean macAddressDetected;
+    private boolean macAddressFileRemoved;
 
     @Autowired
     public SyslogParserService(PxeSessionService sessionService) {
@@ -31,6 +34,7 @@ public class SyslogParserService {
             // not thread safe
             if (macFile != null) {
                 sessionService.deleteByMacAddress(macFile.replaceAll("^01-(.*)", "$1").replaceAll("-", ":"));
+                macAddressFileRemoved = true;
             }
         }
     }
@@ -39,5 +43,11 @@ public class SyslogParserService {
         boolean macAddressDetected = this.macAddressDetected;
         this.macAddressDetected = false;
         return macAddressDetected;
+    }
+
+    public boolean isMacAddressFileRemoved() {
+        boolean macAddressFileRemoved = this.macAddressFileRemoved;
+        this.macAddressFileRemoved = false;
+        return macAddressFileRemoved;
     }
 }
