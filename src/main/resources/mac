@@ -7,4 +7,4 @@ menu title PXE Boot Menu
 label local
   menu label - Install VMware ESXi {{version}} - Fully Configured
   kernel esxi-{{version}}/mboot.c32
-  append -c esxi-{{version}}/boot.cfg ks=http://10.100.20.49/ks/auto-esxhost/{{kickstartFile}}
+  append -c esxi-{{version}}/boot.cfg ks={{pxeUrl}}/ks/auto-esxhost/{{kickstartFile}}

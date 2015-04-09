@@ -131,7 +131,11 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String gateway = "981.765.432.1";
         String password = "moo";
         String hostname = "somehost";
+        String pxeUrl = "http://moo.com";
         String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
+
+        config.setPxeUrl(pxeUrl);
+
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password).withGateway(gateway).withNetmask(netmask).withHostname(hostname));
         assertEquals(session.getStatusCode().value(), 200);
 
@@ -148,6 +152,8 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(kickstartFileContent.matches(".*?network.*?--hostname=" + hostname + ".*"), "Kickstart should contain --hostname=" + hostname);
         assertTrue(kickstartFileContent.matches(".*?network.*?--gateway=" + gateway + ".*"), "Kickstart should contain --gateway=" + gateway);
         assertTrue(kickstartFileContent.matches(".*?network.*?--netmask=" + netmask + ".*"), "Kickstart should contain --netmask=" + netmask);
+        assertTrue(kickstartFileContent.matches(".*?vib install.*?" + pxeUrl + ".*?esxi-mac.*"), "Mac learning vib should be fetched from appropriate PXE server.");
+        assertTrue(kickstartFileContent.matches(".*?vib install.*?" + pxeUrl + ".*?esx-tools.*"), "ESXi tools should be fetched from appropriate PXE server.");
     }
 
     @Test
@@ -159,6 +165,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     private void generatePxeConfigForEsxVersion(String version) throws IOException {
         String macAddress = "00:11:22:33:44:55";
+        String pxeUrl = "http://example.com";
+
+        config.setPxeUrl(pxeUrl);
+
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withVersion(version));
         assertEquals(session.getStatusCode().value(), 200);
 
@@ -170,6 +180,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(content.matches(".*?menu.*?" + version + ".*?kernel.*"), "Expected ESX version in menu line.");
         assertTrue(content.matches(".*?kernel.*?esxi-" + version + ".*?append.*"), "Expected ESX version in kernel line.");
         assertTrue(content.matches(".*?append.*?esxi-" + version + ".*"), "Expected ESX version in append line.");
+        assertTrue(content.matches(".*?append.*?" + pxeUrl + ".*"), "Expected PXE URL in append line.");
     }
 
     private ResponseEntity<PxeSessionResource> createPxeSession(String macAddress, EsxConfigurationResourceBuilder esxConfigBuilder) {

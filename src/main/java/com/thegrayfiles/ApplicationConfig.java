@@ -1,5 +1,6 @@
 package com.thegrayfiles;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,9 @@ public class ApplicationConfig {
     private String pxePath = "/tftpboot/pxe/pxelinux.cfg";
 
     private String kickstartPath = "/var/www/ks/auto-esxhost";
+
+    @Value("${pxe.url}")
+    private String pxeUrl;
 
     public String getPxePath() {
         return pxePath;
@@ -62,5 +66,13 @@ public class ApplicationConfig {
         hibernateJpaVendorAdapter.setGenerateDdl(true);
         hibernateJpaVendorAdapter.setDatabase(Database.H2);
         return hibernateJpaVendorAdapter;
+    }
+
+    public String getPxeUrl() {
+        return pxeUrl;
+    }
+
+    public void setPxeUrl(String pxeUrl) {
+        this.pxeUrl = pxeUrl;
     }
 }

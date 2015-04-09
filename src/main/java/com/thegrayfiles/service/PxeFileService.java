@@ -37,6 +37,7 @@ public class PxeFileService {
             Map<String, Object> scopes = new HashMap<String, Object>();
             scopes.put("kickstartFile", macAddress.replaceAll("[:]", "-") + ".cfg");
             scopes.put("version", version);
+            scopes.put("pxeUrl", config.getPxeUrl());
             FileOutputStream fos = new FileOutputStream(convertMacAddressToFile(macAddress));
             Writer writer = new OutputStreamWriter(fos);
             MustacheFactory mf = new DefaultMustacheFactory();
@@ -60,6 +61,7 @@ public class PxeFileService {
             scopes.put("password", esxConfig.getPassword());
             scopes.put("gateway", esxConfig.getGateway());
             scopes.put("netmask", esxConfig.getNetmask());
+            scopes.put("pxeUrl", config.getPxeUrl());
             FileOutputStream fos = new FileOutputStream(new File(config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg"));
             Writer writer = new OutputStreamWriter(fos);
             MustacheFactory mf = new DefaultMustacheFactory();
