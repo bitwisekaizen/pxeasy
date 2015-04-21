@@ -1,5 +1,6 @@
 package com.thegrayfiles.controller;
 
+import com.thegrayfiles.exception.DuplicateSessionException;
 import com.thegrayfiles.exception.SessionNotFound;
 import com.thegrayfiles.resource.EsxConfigurationResource;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
@@ -30,9 +31,13 @@ public class PxeSessionController {
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
         EsxConfigurationResource esxConfig = request.getConfig();
         String macAddress = request.getMacAddress();
-        PxeSessionResource session = sessionService.createSession(macAddress, esxConfig);
-        session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
-        return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
+        try {
+            PxeSessionResource session = sessionService.createSession(macAddress, esxConfig);
+            session.add(linkTo(methodOn(PxeSessionController.class).getByUuid(session.getUuid())).withSelfRel());
+            return new ResponseEntity<PxeSessionResource>(session, HttpStatus.OK);
+        } catch (DuplicateSessionException e) {
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")

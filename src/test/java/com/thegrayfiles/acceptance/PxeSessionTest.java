@@ -7,7 +7,6 @@ import com.thegrayfiles.builder.EsxConfigurationResourceBuilder;
 import com.thegrayfiles.resource.PxeSessionRequestResource;
 import com.thegrayfiles.resource.PxeSessionResource;
 import com.thegrayfiles.resource.RootResource;
-import com.thegrayfiles.service.PxeFileService;
 import com.thegrayfiles.service.SyslogParserService;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static com.thegrayfiles.builder.EsxConfigurationResourceBuilder.anEsxConfiguration;
 import static com.thegrayfiles.builder.PxeSessionRequestResourceBuilder.aSessionRequest;
@@ -67,7 +67,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canFetchSessionDetails() {
-        String macAddress = "00:1a:2b:3c:4d:5e";
+        String macAddress = generateRandomMacAddress();
 
         ResponseEntity<PxeSessionResource> createdSessionResponse = createPxeSession(macAddress, anEsxConfiguration());
         assertEquals(createdSessionResponse.getStatusCode().value(), 200);
@@ -83,10 +83,16 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertEquals(fetchedSession.getMacAddress(), createdSession.getMacAddress());
     }
 
+    private String generateRandomMacAddress() {
+        byte[] address = new byte[6];
+        new Random().nextBytes(address);
+        return String.format("%02x:%02x:%02x:%02x:%02x:%02x", address[0], address[1], address[2], address[3], address[4], address[5]);
+    }
+
     @Test
     public void canFetchMultipleSessions() {
-        String firstMacAddress = "00:1a:2b:3c:4d:5e";
-        String secondMacAddress = "00:1a:2b:3c:4d:5f";
+        String firstMacAddress = generateRandomMacAddress();
+        String secondMacAddress = generateRandomMacAddress();
 
         ResponseEntity<PxeSessionResource> firstResponse = createPxeSession(firstMacAddress, anEsxConfiguration());
         ResponseEntity<PxeSessionResource> secondResponse = createPxeSession(secondMacAddress, anEsxConfiguration());
@@ -102,8 +108,19 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void multipleMacAddressesShouldNotBeAllowed() {
+        String macAddress = generateRandomMacAddress();
+
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration());
+        assertEquals(session.getStatusCode().value(), 200);
+
+        session = createPxeSession(macAddress, anEsxConfiguration());
+        assertEquals(session.getStatusCode().value(), 403);
+    }
+
+    @Test
     public void pxeSessionGeneratesMacConfigFile() throws IOException {
-        String macAddress = "00:1a:2b:3c:4d:5e";
+        String macAddress = generateRandomMacAddress();
         String ip = "1.2.3.4";
         String password = "somsmgomsg";
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
@@ -125,7 +142,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void pxeSessionGeneratesKickstartFile() throws IOException {
-        String macAddress = "00:11:22:33:44:55";
+        String macAddress = generateRandomMacAddress();
         String ip = "1.2.3.4";
         String netmask = "123.456.789.1";
         String gateway = "981.765.432.1";
@@ -164,7 +181,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     }
 
     private void generatePxeConfigForEsxVersion(String version) throws IOException {
-        String macAddress = "00:11:22:33:44:55";
+        String macAddress = generateRandomMacAddress();
         String pxeUrl = "http://example.com";
 
         config.setPxeUrl(pxeUrl);
@@ -203,7 +220,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void canDeleteSession() {
-        String macAddress = "00:11:22:33:44:55";
+        String macAddress = generateRandomMacAddress();
         ResponseEntity<PxeSessionResource> createdSession = createPxeSession(macAddress, anEsxConfiguration());
 
         deletePxeSession(createdSession.getBody());
@@ -257,7 +274,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         @Override
         public void run() {
-            String macAddress = "00:1a:2b:3c:4d:5" + version.replaceAll("^\\d\\.(\\d).*$", "$1");
+            String macAddress = generateRandomMacAddress();
             String ip = "1.2.3.4";
             String password = "something";
             String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");

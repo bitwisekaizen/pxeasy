@@ -1,6 +1,7 @@
 package com.thegrayfiles.service;
 
 import com.thegrayfiles.entity.SessionEntity;
+import com.thegrayfiles.exception.DuplicateSessionException;
 import com.thegrayfiles.exception.SessionNotFound;
 import com.thegrayfiles.repository.SessionRepository;
 import com.thegrayfiles.resource.EsxConfigurationResource;
@@ -26,9 +27,14 @@ public class PxeSessionService {
         this.repository = repository;
     }
 
-    public PxeSessionResource createSession(String macAddress, EsxConfigurationResource config) {
+    public PxeSessionResource createSession(String macAddress, EsxConfigurationResource config) throws DuplicateSessionException {
         fileService.createMacAddressConfiguration(macAddress, config.getVersion());
         fileService.createKickstartConfiguration(macAddress, config);
+
+        if (repository.findByMacAddress(macAddress).size() != 0) {
+            throw new DuplicateSessionException();
+        }
+
         SessionEntity entity = new SessionEntity(macAddress);
         repository.save(entity);
         return new PxeSessionResource(macAddress, UUID.fromString(entity.getUuid()));
