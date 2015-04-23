@@ -74,7 +74,6 @@ public class ApplicationConfig {
     public Flyway flyway() {
         Flyway flyway = new Flyway();
         flyway.setBaselineOnMigrate(true);
-
         flyway.setDataSource(dataSource());
         return flyway;
     }

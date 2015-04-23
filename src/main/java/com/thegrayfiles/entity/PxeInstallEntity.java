@@ -6,8 +6,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.UUID;
 
-@Entity
-public class SessionEntity {
+@Entity(name = "pxeinstall")
+public class PxeInstallEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -16,18 +16,18 @@ public class SessionEntity {
     private String uuid;
     private String macAddress;
 
-    protected SessionEntity() {
+    protected PxeInstallEntity() {
         this.uuid = UUID.randomUUID().toString();
     }
 
-    public SessionEntity(String macAddress) {
+    public PxeInstallEntity(String macAddress) {
         this();
         this.macAddress = macAddress;
     }
 
     @Override
     public String toString() {
-        return String.format("Customer[id=%d, uuid='%s', macAddress='%s']", id, uuid, macAddress);
+        return String.format("PxeInstall[id=%d, uuid='%s', macAddress='%s']", id, uuid, macAddress);
     }
 
     public String getUuid() {

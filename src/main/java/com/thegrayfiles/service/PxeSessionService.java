@@ -1,6 +1,6 @@
 package com.thegrayfiles.service;
 
-import com.thegrayfiles.entity.SessionEntity;
+import com.thegrayfiles.entity.PxeInstallEntity;
 import com.thegrayfiles.exception.DuplicateSessionException;
 import com.thegrayfiles.exception.SessionNotFound;
 import com.thegrayfiles.repository.SessionRepository;
@@ -35,30 +35,30 @@ public class PxeSessionService {
             throw new DuplicateSessionException();
         }
 
-        SessionEntity entity = new SessionEntity(macAddress);
+        PxeInstallEntity entity = new PxeInstallEntity(macAddress);
         repository.save(entity);
         return new PxeSessionResource(macAddress, UUID.fromString(entity.getUuid()));
     }
 
     public PxeSessionResource getSession(String uuid) throws SessionNotFound {
-        List<SessionEntity> sessions = repository.findByUuid(uuid);
+        List<PxeInstallEntity> sessions = repository.findByUuid(uuid);
         if (sessions.size() == 0) {
             throw new SessionNotFound(uuid);
         }
-        SessionEntity entity = sessions.get(0);
+        PxeInstallEntity entity = sessions.get(0);
         return new PxeSessionResource(entity.getMacAddress(), UUID.fromString(entity.getUuid()));
     }
 
     public List<PxeSessionResource> getAllSessions() {
         List<PxeSessionResource> list = new ArrayList<PxeSessionResource>();
-        for (SessionEntity session : repository.findAll()) {
+        for (PxeInstallEntity session : repository.findAll()) {
             list.add(new PxeSessionResource(session.getMacAddress(), UUID.fromString(session.getUuid())));
         }
         return list;
     }
 
     public void delete(String uuid) {
-        SessionEntity entity = repository.findByUuid(uuid).get(0);
+        PxeInstallEntity entity = repository.findByUuid(uuid).get(0);
         repository.deleteByMacAddress(entity.getMacAddress());
         // @todo change file api
         fileService.deleteMacAddressConfiguration("01-" + entity.getMacAddress().replaceAll("[:]", "-"));
