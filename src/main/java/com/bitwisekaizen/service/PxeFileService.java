@@ -1,11 +1,11 @@
-package com.thegrayfiles.service;
+package com.bitwisekaizen.service;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import com.thegrayfiles.ApplicationConfig;
-import com.thegrayfiles.repository.SessionRepository;
-import com.thegrayfiles.resource.EsxConfigurationResource;
+import com.bitwisekaizen.ApplicationConfig;
+import com.bitwisekaizen.repository.SessionRepository;
+import com.bitwisekaizen.resource.EsxConfigurationResource;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

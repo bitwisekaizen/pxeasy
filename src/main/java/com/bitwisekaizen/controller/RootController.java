@@ -1,6 +1,6 @@
-package com.thegrayfiles.controller;
+package com.bitwisekaizen.controller;
 
-import com.thegrayfiles.resource.RootResource;
+import com.bitwisekaizen.resource.RootResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

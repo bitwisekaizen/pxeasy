@@ -1,11 +1,11 @@
-package com.thegrayfiles.controller;
+package com.bitwisekaizen.controller;
 
-import com.thegrayfiles.exception.DuplicateSessionException;
-import com.thegrayfiles.exception.SessionNotFound;
-import com.thegrayfiles.resource.EsxConfigurationResource;
-import com.thegrayfiles.resource.PxeSessionRequestResource;
-import com.thegrayfiles.resource.PxeSessionResource;
-import com.thegrayfiles.service.PxeSessionService;
+import com.bitwisekaizen.exception.DuplicateSessionException;
+import com.bitwisekaizen.exception.SessionNotFound;
+import com.bitwisekaizen.resource.EsxConfigurationResource;
+import com.bitwisekaizen.resource.PxeSessionRequestResource;
+import com.bitwisekaizen.resource.PxeSessionResource;
+import com.bitwisekaizen.service.PxeSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

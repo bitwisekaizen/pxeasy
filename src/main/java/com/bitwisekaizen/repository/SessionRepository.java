@@ -1,6 +1,6 @@
-package com.thegrayfiles.repository;
+package com.bitwisekaizen.repository;
 
-import com.thegrayfiles.entity.PxeInstallEntity;
+import com.bitwisekaizen.entity.PxeInstallEntity;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

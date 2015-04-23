@@ -1,6 +1,6 @@
-package com.thegrayfiles.builder;
+package com.bitwisekaizen.builder;
 
-import com.thegrayfiles.resource.EsxConfigurationResource;
+import com.bitwisekaizen.resource.EsxConfigurationResource;
 import org.apache.commons.lang3.builder.Builder;
 
 public class EsxConfigurationResourceBuilder implements Builder<EsxConfigurationResource> {

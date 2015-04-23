@@ -1,4 +1,4 @@
-package com.thegrayfiles;
+package com.bitwisekaizen;
 
 import org.flywaydb.core.Flyway;
 import org.h2.Driver;
@@ -69,7 +69,7 @@ public class ApplicationConfig {
         LocalContainerEntityManagerFactoryBean lef = new LocalContainerEntityManagerFactoryBean();
         lef.setDataSource(dataSource);
         lef.setJpaVendorAdapter(jpaVendorAdapter);
-        lef.setPackagesToScan("com.thegrayfiles.entity");
+        lef.setPackagesToScan("com.bitwisekaizen.entity");
         lef.setDataSource(dataSource());
         lef.setJpaProperties(jpaProperties());
         lef.setLoadTimeWeaver(new InstrumentationLoadTimeWeaver());

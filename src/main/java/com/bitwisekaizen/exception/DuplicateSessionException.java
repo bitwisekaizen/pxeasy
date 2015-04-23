@@ -1,4 +1,4 @@
-package com.thegrayfiles.exception;
+package com.bitwisekaizen.exception;
 
 public class DuplicateSessionException extends Exception {
 }

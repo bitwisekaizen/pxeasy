@@ -1,11 +1,11 @@
-package com.thegrayfiles.service;
+package com.bitwisekaizen.service;
 
-import com.thegrayfiles.entity.PxeInstallEntity;
-import com.thegrayfiles.exception.DuplicateSessionException;
-import com.thegrayfiles.exception.SessionNotFound;
-import com.thegrayfiles.repository.SessionRepository;
-import com.thegrayfiles.resource.EsxConfigurationResource;
-import com.thegrayfiles.resource.PxeSessionResource;
+import com.bitwisekaizen.entity.PxeInstallEntity;
+import com.bitwisekaizen.exception.DuplicateSessionException;
+import com.bitwisekaizen.exception.SessionNotFound;
+import com.bitwisekaizen.repository.SessionRepository;
+import com.bitwisekaizen.resource.EsxConfigurationResource;
+import com.bitwisekaizen.resource.PxeSessionResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

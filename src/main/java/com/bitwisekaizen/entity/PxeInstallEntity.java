@@ -1,4 +1,4 @@
-package com.thegrayfiles.entity;
+package com.bitwisekaizen.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

@@ -1,6 +1,6 @@
-package com.thegrayfiles.builder;
+package com.bitwisekaizen.builder;
 
-import com.thegrayfiles.resource.PxeSessionRequestResource;
+import com.bitwisekaizen.resource.PxeSessionRequestResource;
 import org.apache.commons.lang3.builder.Builder;
 
 public class PxeSessionRequestResourceBuilder implements Builder<PxeSessionRequestResource> {

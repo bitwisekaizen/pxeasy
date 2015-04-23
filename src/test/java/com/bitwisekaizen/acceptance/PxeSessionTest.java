@@ -1,13 +1,13 @@
-package com.thegrayfiles.acceptance;
+package com.bitwisekaizen.acceptance;
 
 import com.google.common.io.Files;
-import com.thegrayfiles.Application;
-import com.thegrayfiles.ApplicationConfig;
-import com.thegrayfiles.builder.EsxConfigurationResourceBuilder;
-import com.thegrayfiles.resource.PxeSessionRequestResource;
-import com.thegrayfiles.resource.PxeSessionResource;
-import com.thegrayfiles.resource.RootResource;
-import com.thegrayfiles.service.SyslogParserService;
+import com.bitwisekaizen.Application;
+import com.bitwisekaizen.ApplicationConfig;
+import com.bitwisekaizen.builder.EsxConfigurationResourceBuilder;
+import com.bitwisekaizen.resource.PxeSessionRequestResource;
+import com.bitwisekaizen.resource.PxeSessionResource;
+import com.bitwisekaizen.resource.RootResource;
+import com.bitwisekaizen.service.SyslogParserService;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +33,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import static com.thegrayfiles.builder.EsxConfigurationResourceBuilder.anEsxConfiguration;
-import static com.thegrayfiles.builder.PxeSessionRequestResourceBuilder.aSessionRequest;
+import static com.bitwisekaizen.builder.EsxConfigurationResourceBuilder.anEsxConfiguration;
+import static com.bitwisekaizen.builder.PxeSessionRequestResourceBuilder.aSessionRequest;
 import static org.testng.Assert.*;
 
 

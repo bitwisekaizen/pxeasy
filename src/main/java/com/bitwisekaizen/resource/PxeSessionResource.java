@@ -1,4 +1,4 @@
-package com.thegrayfiles.resource;
+package com.bitwisekaizen.resource;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

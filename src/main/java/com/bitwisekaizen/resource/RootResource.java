@@ -1,4 +1,4 @@
-package com.thegrayfiles.resource;
+package com.bitwisekaizen.resource;
 
 import org.springframework.hateoas.ResourceSupport;
 
