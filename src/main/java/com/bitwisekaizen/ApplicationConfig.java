@@ -28,8 +28,11 @@ public class ApplicationConfig {
     @Value("${pxe.url}")
     private String pxeUrl;
 
-    @Value("${pxeasy.db.file:~/pxeasy.db}")
-    private String dbFile;
+    @Value("${pxeasy.jdbc.url}")
+    private String jdbcUrl;
+
+    @Value("${spring.jpa.hibernate.ddl-auto:validate}")
+    private String hbm2ddlAuto;
 
     public String getPxePath() {
         return pxePath;
@@ -54,7 +57,6 @@ public class ApplicationConfig {
 
     @Bean
     public DataSource dataSource() {
-        String jdbcUrl = "jdbc:h2:file:" + dbFile;
         SimpleDriverDataSource ds = new SimpleDriverDataSource();
         ds.setDriverClass(Driver.class);
         ds.setUrl(jdbcUrl);
@@ -79,7 +81,7 @@ public class ApplicationConfig {
     private Properties jpaProperties() {
         Properties props = new Properties();
         props.put("hibernate.query.substitutions", "true 'Y', false 'N'");
-        props.put("hibernate.hbm2ddl.auto", "validate");
+        props.put("hibernate.hbm2ddl.auto", hbm2ddlAuto);
         props.put("hibernate.show_sql", "false");
         props.put("hibernate.format_sql", "true");
         return props;

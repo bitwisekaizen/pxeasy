@@ -46,7 +46,7 @@ import static org.testng.Assert.*;
         DependencyInjectionTestExecutionListener.class,
         DirtiesContextTestExecutionListener.class})
 @Test
-@TestPropertySource(properties = "tail.autoStartup = false")
+@TestPropertySource(properties = "tail.autoStartup = false", locations = {"classpath:test.properties"})
 public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Value("${local.server.port}")
