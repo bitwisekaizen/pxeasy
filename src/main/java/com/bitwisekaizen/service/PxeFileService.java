@@ -29,7 +29,6 @@ public class PxeFileService {
         this.config = config;
         this.repository = repository;
         macTemplate = new ClassPathResource("mac");
-        kickstartTemplate = new ClassPathResource("kickstart.cfg");
     }
 
     public void createMacAddressConfiguration(String macAddress, String version) {
@@ -54,6 +53,11 @@ public class PxeFileService {
     }
 
     public void createKickstartConfiguration(String macAddress, EsxConfigurationResource esxConfig) {
+        if (esxConfig.getVersion().equals("6.0")) {
+            kickstartTemplate = new ClassPathResource("kickstart-6.x.cfg");
+        } else {
+            kickstartTemplate = new ClassPathResource("kickstart.cfg");
+        }
         try {
             Map<String, Object> scopes = new HashMap<String, Object>();
             scopes.put("ip", esxConfig.getIp());
