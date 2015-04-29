@@ -142,6 +142,11 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void pxeSessionGeneratesKickstartFile() throws IOException {
+        pxeSessionGeneratesKickstartFileForEsxVersion("5.1");
+        pxeSessionGeneratesKickstartFileForEsxVersion("6.0");
+    }
+
+    private void pxeSessionGeneratesKickstartFileForEsxVersion(String version) throws IOException {
         String macAddress = generateRandomMacAddress();
         String ip = "1.2.3.4";
         String netmask = "123.456.789.1";
@@ -153,7 +158,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         config.setPxeUrl(pxeUrl);
 
-        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password).withGateway(gateway).withNetmask(netmask).withHostname(hostname));
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password).withGateway(gateway).withNetmask(netmask).withHostname(hostname).withVersion(version));
         assertEquals(session.getStatusCode().value(), 200);
 
         File kickstartFile = new File(kickstartFilename);
@@ -170,7 +175,11 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         assertTrue(kickstartFileContent.matches(".*?network.*?--gateway=" + gateway + ".*"), "Kickstart should contain --gateway=" + gateway);
         assertTrue(kickstartFileContent.matches(".*?network.*?--netmask=" + netmask + ".*"), "Kickstart should contain --netmask=" + netmask);
         assertTrue(kickstartFileContent.matches(".*?vib install.*?" + pxeUrl + ".*?esxi-mac.*"), "Mac learning vib should be fetched from appropriate PXE server.");
-        assertTrue(kickstartFileContent.matches(".*?vib install.*?" + pxeUrl + ".*?esx-tools.*"), "ESXi tools should be fetched from appropriate PXE server.");
+        if (version.equals("6.0")) {
+            assertFalse(kickstartFileContent.matches(".*?vib install.*?" + pxeUrl + ".*?esx-tools.*"), "ESXi tools should not be installed for ESX 6.0.");
+        } else {
+            assertTrue(kickstartFileContent.matches(".*?vib install.*?" + pxeUrl + ".*?esx-tools.*"), "ESXi tools should be installed for non-6.0 hosts.");
+        }
     }
 
     @Test
@@ -186,7 +195,6 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String pxeUrl = "http://example.com";
 
         config.setPxeUrl(pxeUrl);
-
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withVersion(version));
         assertEquals(session.getStatusCode().value(), 200);
 
