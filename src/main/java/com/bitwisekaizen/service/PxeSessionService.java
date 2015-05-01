@@ -6,6 +6,7 @@ import com.bitwisekaizen.exception.SessionNotFound;
 import com.bitwisekaizen.repository.SessionRepository;
 import com.bitwisekaizen.resource.EsxConfigurationResource;
 import com.bitwisekaizen.resource.PxeSessionResource;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ public class PxeSessionService {
 
     private PxeFileService fileService;
     private SessionRepository repository;
+
+    private Logger logger = Logger.getLogger(PxeSessionService.class);
 
     @Autowired
     public PxeSessionService(PxeFileService fileService, SessionRepository repository) {
@@ -57,14 +60,27 @@ public class PxeSessionService {
         return list;
     }
 
-    public void delete(String uuid) {
-        PxeInstallEntity entity = repository.findByUuid(uuid).get(0);
-        repository.deleteByMacAddress(entity.getMacAddress());
+    public void delete(PxeInstallEntity install) {
+        repository.deleteByMacAddress(install.getMacAddress());
         // @todo change file api
-        fileService.deleteMacAddressConfiguration("01-" + entity.getMacAddress().replaceAll("[:]", "-"));
+        fileService.deleteMacAddressConfiguration("01-" + install.getMacAddress().replaceAll("[:]", "-"));
     }
 
     public void deleteByMacAddress(String macAddress) {
-        delete(repository.findByMacAddress(macAddress).get(0).getUuid());
+        List<PxeInstallEntity> installations = repository.findByMacAddress(macAddress);
+        if (installations.size() > 0) {
+            delete(installations.get(0));
+        }
+        logger.warn("Trying to delete installation for mac address " + macAddress + " that doesn't exist.");
+        // @todo throw if session doesn't exist
+    }
+
+    public void deleteByUuid(String uuid) {
+        List<PxeInstallEntity> installations = repository.findByUuid(uuid);
+        if (installations.size() > 0) {
+            delete(installations.get(0));
+        }
+        // @todo throw if install doesn't exist
+        logger.warn("Trying to delete installation for uuid " + uuid + " that doesn't exist.");
     }
 }

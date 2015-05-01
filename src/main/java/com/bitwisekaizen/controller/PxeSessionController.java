@@ -60,6 +60,6 @@ public class PxeSessionController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{uuid}")
     public void deleteSession(@PathVariable String uuid) {
-        sessionService.delete(uuid);
+        sessionService.deleteByUuid(uuid);
     }
 }
