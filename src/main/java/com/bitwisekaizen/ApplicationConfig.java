@@ -3,11 +3,10 @@ package com.bitwisekaizen;
 import org.flywaydb.core.Flyway;
 import org.h2.Driver;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.*;
 import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -18,7 +17,10 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import javax.sql.DataSource;
 import java.util.Properties;
 
+@EnableAutoConfiguration
 @Configuration
+@ComponentScan
+@ImportResource(value = "classpath:spring/integrationContext.xml")
 public class ApplicationConfig {
 
     private String pxePath = "/tftpboot/pxe/pxelinux.cfg";
