@@ -38,7 +38,7 @@ import static com.bitwisekaizen.builder.PxeSessionRequestResourceBuilder.aSessio
 import static org.testng.Assert.*;
 
 
-@SpringApplicationConfiguration(classes = Application.class)
+@SpringApplicationConfiguration(classes = ApplicationConfig.class)
 @WebAppConfiguration
 @IntegrationTest({"server.port:0"})
 // See http://stackoverflow.com/questions/25537436/acceptance-testing-a-spring-boot-web-app-with-testng
