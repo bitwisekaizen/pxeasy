@@ -108,6 +108,14 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void validationShouldOccurWhenCreatingPxeSession() {
+        String macAddress = "i'm one bad mac address";
+
+        ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration());
+        assertEquals(session.getStatusCode().value(), 400);
+    }
+
+    @Test
     public void multipleMacAddressesShouldNotBeAllowed() {
         String macAddress = generateRandomMacAddress();
 
