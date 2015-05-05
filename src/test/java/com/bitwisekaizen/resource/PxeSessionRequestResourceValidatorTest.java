@@ -32,9 +32,8 @@ public class PxeSessionRequestResourceValidatorTest {
 
     @Test
     public void validationShouldPassForValidMacAddress() {
-        Set<ConstraintViolation<?>> violations = getViolations(aSessionRequest("0a-1b-3c-4d-5e-6a").build());
-
-        assertThat(violations, hasSize(0));
+        assertThat(getViolations(aSessionRequest("0a-1b-3c-4d-5e-6a").build()), hasSize(0));
+        assertThat(getViolations(aSessionRequest("0a:1b:3c:4d:5e:6a").build()), hasSize(0));
     }
 
     @Test
@@ -62,6 +61,8 @@ public class PxeSessionRequestResourceValidatorTest {
         assertHasSingleViolation(getViolations(aSessionRequest("0a-1b-aaa").build()), "mac.address.malformed");
 
         assertHasSingleViolation(getViolations(aSessionRequest("za-1b-3c-4d-5e-6a").build()), "mac.address.malformed");
+
+        assertHasSingleViolation(getViolations(aSessionRequest("za:1b:3c:4d:5e:6a").build()), "mac.address.malformed");
     }
 
     private void assertHasSingleViolation(Set<ConstraintViolation<?>> violations, String message) {

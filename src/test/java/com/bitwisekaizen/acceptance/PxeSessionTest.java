@@ -70,10 +70,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String macAddress = generateRandomMacAddress();
 
         ResponseEntity<PxeSessionResource> createdSessionResponse = createPxeSession(macAddress, anEsxConfiguration());
-        assertEquals(createdSessionResponse.getStatusCode().value(), 200);
+        assertEquals(createdSessionResponse.getStatusCode(), HttpStatus.OK);
 
         ResponseEntity<PxeSessionResource> fetchedSessionResponse = getPxeSessionByUuid(createdSessionResponse.getBody().getUuid());
-        assertEquals(fetchedSessionResponse.getStatusCode().value(), 200);
+        assertEquals(fetchedSessionResponse.getStatusCode(), HttpStatus.OK);
 
         PxeSessionResource createdSession = createdSessionResponse.getBody();
         PxeSessionResource fetchedSession = fetchedSessionResponse.getBody();
@@ -112,7 +112,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String macAddress = "i'm one bad mac address";
 
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration());
-        assertEquals(session.getStatusCode().value(), 400);
+        assertEquals(session.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -120,10 +120,10 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String macAddress = generateRandomMacAddress();
 
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration());
-        assertEquals(session.getStatusCode().value(), 200);
+        assertEquals(session.getStatusCode(), HttpStatus.OK);
 
         session = createPxeSession(macAddress, anEsxConfiguration());
-        assertEquals(session.getStatusCode().value(), 403);
+        assertEquals(session.getStatusCode(), HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -134,7 +134,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
 
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
-        assertEquals(session.getStatusCode().value(), 200);
+        assertEquals(session.getStatusCode(), HttpStatus.OK);
 
         File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
         macAddressFile.deleteOnExit();
@@ -167,7 +167,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
         config.setPxeUrl(pxeUrl);
 
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password).withGateway(gateway).withNetmask(netmask).withHostname(hostname).withVersion(version));
-        assertEquals(session.getStatusCode().value(), 200);
+        assertEquals(session.getStatusCode(), HttpStatus.OK);
 
         File kickstartFile = new File(kickstartFilename);
         kickstartFile.deleteOnExit();
@@ -204,7 +204,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
 
         config.setPxeUrl(pxeUrl);
         ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withVersion(version));
-        assertEquals(session.getStatusCode().value(), 200);
+        assertEquals(session.getStatusCode(), HttpStatus.OK);
 
         String macAddressFilename = "01-" + macAddress.replaceAll("[:]", "-");
         File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
@@ -298,7 +298,7 @@ public class PxeSessionTest extends AbstractTestNGSpringContextTests {
             String kickstartFilename = config.getKickstartPath() + "/" + macAddress.replaceAll("[:]", "-") + ".cfg";
 
             ResponseEntity<PxeSessionResource> session = createPxeSession(macAddress, anEsxConfiguration().withIp(ip).withPassword(password));
-            assertEquals(session.getStatusCode().value(), 200);
+            assertEquals(session.getStatusCode(), HttpStatus.OK);
 
             File kickstartFile = new File(kickstartFilename);
             File macAddressFile = new File(config.getPxePath() + "/" + macAddressFilename);
