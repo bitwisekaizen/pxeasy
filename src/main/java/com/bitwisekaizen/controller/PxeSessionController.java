@@ -6,11 +6,13 @@ import com.bitwisekaizen.resource.EsxConfigurationResource;
 import com.bitwisekaizen.resource.PxeSessionRequestResource;
 import com.bitwisekaizen.resource.PxeSessionResource;
 import com.bitwisekaizen.service.PxeSessionService;
+import com.bitwisekaizen.validation.DtoValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -21,14 +23,23 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class PxeSessionController {
 
     private PxeSessionService sessionService;
+    private DtoValidator dtoValidator;
 
     @Autowired
-    public PxeSessionController(PxeSessionService fileService) {
+    public PxeSessionController(PxeSessionService fileService, DtoValidator dtoValidator) {
         this.sessionService = fileService;
+        this.dtoValidator = dtoValidator;
     }
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PxeSessionResource> create(@RequestBody PxeSessionRequestResource request) {
+        // @todo: need to add in response interceptor to avoid manually catching these exceptions
+        try {
+            dtoValidator.validate(request);
+        } catch (ConstraintViolationException e) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+
         EsxConfigurationResource esxConfig = request.getConfig();
         String macAddress = request.getMacAddress();
         try {
